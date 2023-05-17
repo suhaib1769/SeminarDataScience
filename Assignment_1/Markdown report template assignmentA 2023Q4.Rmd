@@ -79,113 +79,30 @@ Create a synthetic data set with a clear difference between tweets’ sentiments
 #include your code for generating the synthetic data
 ```
 
-### Collecting tweets, and data preparation
-Include the annotated R script (excluding your personal Keys and Access Tokens information), but put echo=FALSE, so code is not included in the output pdf file.
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
-
-#during writing you could add "eval = FALSE",  kntr will than not run this code chunk (take some time do) # nolint
-
-setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS") 
-# apple , note use / instead of \, which used by windows
-
-
-#install.packages("twitteR", dependencies = TRUE)
-library(twitteR)
-#install.packages("RCurl", dependencies = T)
-library(RCurl)
-#install.packages("bitops", dependencies = T)
-library(bitops)
-#install.packages("plyr", dependencies = T)
-library(plyr)
-#install.packages('stringr', dependencies = T)
-library(stringr)
-#install.packages("NLP", dependencies = T)
-library(NLP)
-#install.packages("tm", dependencies = T)
-library(tm)
-#install.packages("wordcloud", dependencies=T)
-#install.packages("RColorBrewer", dependencies=TRUE)
-library(RColorBrewer)
-library(wordcloud)
-#install.packages("reshape", dependencies=T)
-library(reshape)
-
-################### functions
-
-  
-clearTweets <- function(tweets, excl) {
-  
-  tweets.text <- sapply(tweets, function(t)t$getText()) #get text out of tweets 
-
-  
-  tweets.text = gsub('[[:cntrl:]]', '', tweets.text)
-  tweets.text = gsub('\\d+', '', tweets.text)
-  tweets.text <- str_replace_all(tweets.text,"[^[:graph:]]", " ") #remove graphic
-  
-  
-  corpus <- Corpus(VectorSource(tweets.text))
-  
-  corpus_clean <- tm_map(corpus, removePunctuation)
-  corpus_clean <- tm_map(corpus_clean, content_transformer(tolower))
-  corpus_clean <- tm_map(corpus_clean, removeWords, stopwords("english"))
-  corpus_clean <- tm_map(corpus_clean, removeNumbers)
-  corpus_clean <- tm_map(corpus_clean, stripWhitespace)
-  corpus_clean <- tm_map(corpus_clean, removeWords, c(excl,"http","https","httpst"))
-  
-
-  return(corpus_clean)
-} 
-
-
-## capture all the output to a file.
-
-################# Collect from Twitter
-
-# for creating a twitter app (apps.twitter.com) see youtube https://youtu.be/lT4Kosc_ers
-#consumer_key <-'your key'
-#consumer_scret <- 'your secret'
-#access_token <- 'your access token'
-#access_scret <- 'your access scret'
-
-source("wpb_twitter.R") #this file will set my personal variables for my twitter app, adjust the name of this file. use the provide template your_twitter.R
-
-setup_twitter_oauth(consumer_key,consumer_scret, access_token,access_scret) #connect to  twitter app
-
 
 ##### This example uses the following 3 celebrities: Donald Trump, Hillary Clinton, and Bernie Sanders
 ##  You should replace this with your own celebrities, at least 3, but more preferred 
 ##  Note that it will take the computer some to collect the tweets
+setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
 
-tweets_T <- searchTwitter("#trump", n=100, lang="en", resultType="recent") #n recent tweets about Donald Trump, in English ( Twitter sometimes modifies number of tweets that you can collect)
-tweets_C <- searchTwitter("#hillary", n=100, lang="en", resultType="recent") #n recent tweets about Hillary Clinton
-tweets_B <- searchTwitter("#bernie", n=100, lang="en", resultType="recent") #n recent tweets about Bernie Sanders
+tweets_B <- read.table("tweets_B.txt",sep="\n",header=T)
+tweets_B <- tweets_B[seq(1, nrow(tweets_B), 2), ]
+tweets_B
+length(tweets_B)
 
-#overtime Twitter allow fewer tweets to be collected so you might have to adjust this number
+tweets_C <- read.table("tweets_C.txt",sep="\n",header=T)
+tweets_C <- tweets_C[seq(1, nrow(tweets_C), 2), ]
+length(tweets_C)
 
-######################## WordCloud
-### This not requires in the assignment, but still fun to do 
-
-# based on https://youtu.be/JoArGkOpeU0
-
-#corpus_T<-clearTweets(tweets_T, c("trump","amp","realdonaldtrump","trumptrain","donald","trumps","alwaystrump")) #remove also some campain slogans
-#wordcloud(corpus_T, max.words=50)
-
-#corpus_C<-clearTweets(tweets_C, c("hillary","amp","clinton","hillarys"))
-#wordcloud(corpus_C,  max.words=50)
-
-#corpus_B<-clearTweets(tweets_B, c("bernie", "amp", "sanders","bernies"))
-#wordcloud(corpus_B,  max.words=50)
-##############################
-
+tweets_T <- read.table("tweets_T.txt",sep="\n",header=T)
+tweets_T <- tweets_T[seq(1, nrow(tweets_T), 2), ]
+length(tweets_T)
+tweets_T
 ######################## Sentiment analysis
 
-tweets_T.text <- laply(tweets_T, function(t)t$getText()) #get text out of tweets 
-tweets_C.text <- laply(tweets_C, function(t)t$getText()) #get text out of tweets
-tweets_B.text <- laply(tweets_B, function(t)t$getText()) #get text out of tweets
-
-
+tweets_T.text <- laply(tweets_T, function(t)t$getText()) 
+tweets_C.text <- laply(tweets_C, function(t)t$getText()) 
+tweets_B.text <- laply(tweets_B, function(t)t$getText())
 
 #taken from https://github.com/mjhea0/twitter-sentiment-analysis
 pos <- scan('positive-words.txt', what = 'character', comment.char=';') #read the positive words
@@ -195,9 +112,9 @@ source("sentiment3.R") #load algorithm
 # see sentiment3.R form more information about sentiment analysis. It assigns a intereger score
 # by subtracting the number of occurrence of negative words from that of positive words
 
-analysis_T <- score.sentiment(tweets_T.text, pos, neg)
-analysis_C <- score.sentiment(tweets_C.text, pos, neg)
-analysis_B <- score.sentiment(tweets_B.text, pos, neg)
+analysis_T <- score.sentiment(tweets_T, pos, neg)
+analysis_C <- score.sentiment(tweets_C, pos, neg)
+analysis_B <- score.sentiment(tweets_B, pos, neg)
 
 
 sem<-data.frame(analysis_T$score, analysis_C$score, analysis_B$score)
