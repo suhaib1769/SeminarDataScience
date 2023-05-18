@@ -67,7 +67,7 @@ Alternatively, a permutation test can be used as a non-parametric approach. It a
 ##### Loaded tweets of Hillary Clinton, Donald Trump and Bernie Sanders from the .txt files provided in the assignment.
 ```{r}
 # setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
-
+getwd()
 tweets_B <- read.table("tweets_B.txt",sep="\n",header=T)
 tweets_B <- tweets_B[seq(1, nrow(tweets_B), 2), ]
 
@@ -107,8 +107,10 @@ Based on the research questions our conceptual model consists of the following v
 - Independent variable: The different individuals/organisations (Hillary Clinton, Donald Trump, Bernie Sanders)
 - Dependent variable: Sentiment of the tweets (positive, negative, neutral)
 - Mediating variable: Content of the tweets, contextual factors  
-This is visualised in the diagrtam below:
-
+This is visualised in the diagram below:
+```{r}
+knitr::include_graphics("conceptualModel.png")
+```
 ### Model description
 Describe the mathematical model fitted on the most extensive model. (hint, look at the mark down file of the lectures to see example on formulate mathematical models in markdown). Assume a Gaussian distribution for the tweet’s sentiments rating. Justify the priors.
 
