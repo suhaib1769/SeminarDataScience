@@ -157,8 +157,6 @@ ggplot(semFrame, aes(x = Candidate, y = score)) +
   labs(x = "Individual", y = "Sentiment", title = "Distribution of sentiment for each individual")
 ```
 
-```
-
 ### Frequentist approach
 
 #### Analysis verification
