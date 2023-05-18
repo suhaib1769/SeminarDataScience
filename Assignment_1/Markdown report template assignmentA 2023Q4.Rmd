@@ -6,7 +6,7 @@ date: "16/04/2023"
 output:
    pdf_document:
       fig_caption: true
-      number_sections: true
+      number_sections: true 
 ---
 
 ```{r setup, include=FALSE}
@@ -64,45 +64,18 @@ Alternatively, a permutation test can be used as a non-parametric approach. It a
 
 ## Question 1 Twitter sentiment analysis (Between groups - single factor) 
 
-### Conceptual model
-Make a conceptual model for the following research question: Is there a difference in the sentiment of the tweets related to the different individuals/organisations?
-
-### Model description
-
-Describe the mathematical model fitted on the most extensive model. (hint, look at the mark down file of the lectures to see example on formulate mathematical models in markdown). Assume a Gaussian distribution for the tweet’s sentiments rating. Justify the priors.
-
-### Generate Synthetic data
-Create a synthetic data set with a clear difference between tweets’ sentiments of celebrities for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data. (hint, look at class lecture slides of lecture on Generalized linear models for example to create synthetic data)
-
-
+##### Loaded tweets of Hillary Clinton, Donald Trump and Bernie Sanders from the .txt files provided in the assignment.
 ```{r}
-#include your code for generating the synthetic data
-```
-
-
-##### This example uses the following 3 celebrities: Donald Trump, Hillary Clinton, and Bernie Sanders
-##  You should replace this with your own celebrities, at least 3, but more preferred 
-##  Note that it will take the computer some to collect the tweets
-setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
+# setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
 
 tweets_B <- read.table("tweets_B.txt",sep="\n",header=T)
 tweets_B <- tweets_B[seq(1, nrow(tweets_B), 2), ]
-tweets_B
-length(tweets_B)
 
 tweets_C <- read.table("tweets_C.txt",sep="\n",header=T)
 tweets_C <- tweets_C[seq(1, nrow(tweets_C), 2), ]
-length(tweets_C)
 
 tweets_T <- read.table("tweets_T.txt",sep="\n",header=T)
 tweets_T <- tweets_T[seq(1, nrow(tweets_T), 2), ]
-length(tweets_T)
-tweets_T
-######################## Sentiment analysis
-
-tweets_T.text <- laply(tweets_T, function(t)t$getText()) 
-tweets_C.text <- laply(tweets_C, function(t)t$getText()) 
-tweets_B.text <- laply(tweets_B, function(t)t$getText())
 
 #taken from https://github.com/mjhea0/twitter-sentiment-analysis
 pos <- scan('positive-words.txt', what = 'character', comment.char=';') #read the positive words
@@ -119,21 +92,71 @@ analysis_B <- score.sentiment(tweets_B, pos, neg)
 
 sem<-data.frame(analysis_T$score, analysis_C$score, analysis_B$score)
 
-
+library(reshape2)
 semFrame <-melt(sem, measured=c(analysis_T.score,analysis_C.score, analysis_B.score ))
 names(semFrame) <- c("Candidate", "score")
 semFrame$Candidate <-factor(semFrame$Candidate, labels=c("Donald Trump", "Hillary Clinton", "Bernie Sanders")) # change the labels for your individual/organisation
-
+head(semFrame)
 #The data you need for the analyses can be found in semFrame
-
 ```
 
+### Conceptual model
+Make a conceptual model for the following research question: Is there a difference in the sentiment of the tweets related to the different individuals/organisations? 
+
+Based on the research questions our conceptual model consists of the following variables:
+- Independent variable: The different individuals/organisations (Hillary Clinton, Donald Trump, Bernie Sanders)
+- Dependent variable: Sentiment of the tweets (positive, negative, neutral)
+- Mediating variable: Content of the tweets, contextual factors  
+This is visualised in the diagrtam below:
+
+### Model description
+Describe the mathematical model fitted on the most extensive model. (hint, look at the mark down file of the lectures to see example on formulate mathematical models in markdown). Assume a Gaussian distribution for the tweet’s sentiments rating. Justify the priors.
+
+The mathematical model fitted on the most extensive model is a linear model. The model is formulated as follows:
+
+$$
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i 
+$$
+
+Where $y_i$ is the sentiment of the tweet, $\beta_0$ is the intercept, $\beta_1$ is the slope, $x_i$ is the individual/organisation and $\epsilon_i$ is the error term.
+
+### Generate Synthetic data
+Create a synthetic data set with a clear difference between tweets’ sentiments of celebrities for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data. (hint, look at class lecture slides of lecture on Generalized linear models for example to create synthetic data)
+
+```{r}
+#include your code for generating the synthetic data and output in the document
+
+# Set the seed for reproducibility
+set.seed(123)
+
+# Create the synthetic data frame
+synthetic <- data.frame(
+  individual = c(rep("Donald Trump", 100), rep("Hillary Clinton", 100), rep("Bernie Sanders", 100)),
+  sentiment = sample(-5:5, size = 300, replace = TRUE)
+)
+head(synthetic)
+```
 
 ### Visual inspection Mean and distribution sentiments
 Graphically examine the mean and distribution sentiments of tweets for each individual/organisation, and provide interpretation
 
 ```{r}
 #include your analysis code and output in the document
+
+# Plot the mean sentiment for each individual for synthetic data
+library(ggplot2)
+# ggplot(synthetic, aes(x = individual, y = sentiment)) +
+#   geom_boxplot() +
+#   geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+#   labs(x = "Individual", y = "Sentiment", title = "Mean sentiment for each individual")
+
+# Plot the distribution of sentiment for each individual for actual data
+ggplot(semFrame, aes(x = Candidate, y = score)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  labs(x = "Individual", y = "Sentiment", title = "Distribution of sentiment for each individual")
+```
+
 ```
 
 ### Frequentist approach
