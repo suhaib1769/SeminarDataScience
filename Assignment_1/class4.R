@@ -33,10 +33,9 @@ m1_stan <- map2stan(
         sigma ~ dcauchy(0, 2)
     ), data=mtcars, iter = 10000, chains = 4, cores = 4
 )
-
+compare(m0_stan, m1_stan)
 precis(m0_stan)
 precis(m1_stan)
-compare(m0_stan, m1_stan) 
 
 # compare(list(m0_stan = m0_stan, m1_stan = m1_stan), labels = c("Model 0", "Model 1"))
 
@@ -45,7 +44,7 @@ course <- rbinom(100,1,0.5)
 success_rate <- exp(1+0.1*course)
 success <- rpois(100, success_rate)
 d_2 <- data.frame(success, course)
-hist(d$success)
+hist(d_2$success)
 
 # fit model with glm
 m0_2 <- glm(success ~ 1, data=d, family=poisson)
@@ -62,7 +61,7 @@ m0_stan_2 <- map2stan(
     success ~ dpois(lambda),
     log(lambda) <- a,
     a ~ dexp(1)
-  ), data=d, iter = 10000, chains = 4, cores = 4
+  ), data=d_2, iter = 10000, chains = 4, cores = 4
 )
 m1_stan_2 <- map2stan(
   alist(
@@ -70,7 +69,7 @@ m1_stan_2 <- map2stan(
     log(lambda) <- a + b*course,
     a ~ dexp(1),
     b ~ dexp(0.1)
-  ), data=d, iter = 10000, chains = 4, cores = 4
+  ), data=d_2, iter = 10000, chains = 4, cores = 4
 )
 precis(m0_stan_2)
 precis(m1_stan_2)

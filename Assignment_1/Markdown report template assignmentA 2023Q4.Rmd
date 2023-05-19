@@ -66,7 +66,7 @@ Alternatively, a permutation test can be used as a non-parametric approach. It a
 
 ##### Loaded tweets of Hillary Clinton, Donald Trump and Bernie Sanders from the .txt files provided in the assignment.
 ```{r}
-# setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
+setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
 getwd()
 tweets_B <- read.table("tweets_B.txt",sep="\n",header=T)
 tweets_B <- tweets_B[seq(1, nrow(tweets_B), 2), ]
@@ -137,6 +137,9 @@ synthetic <- data.frame(
   sentiment = sample(-5:5, size = 300, replace = TRUE)
 )
 head(synthetic)
+
+# print data types of the columns
+str(synthetic)
 ```
 
 ### Visual inspection Mean and distribution sentiments
@@ -166,6 +169,11 @@ Verify your model analysis with synthetic data and show that it can reproduce th
 
 ```{r}
 #include your analysis code of synthetic data and output in the document
+m0 <- lm(sentiment ~ 1, data = synthetic)
+m1 <- lm(sentiment ~ individual, data = synthetic)
+anova(m0, m1)
+AIC(m0)
+AIC(m1)
 ```
 
 
@@ -174,6 +182,11 @@ Redo the analysis now on the real tweet data set. Provide a short interpretation
 
 ```{r}
 #include your analysis code and output in the document
+m0_real <- lm(score ~ 1, data = semFrame)
+m1_real <- lm(score ~ Candidate, data = semFrame)
+anova(m0_real, m1_real)
+AIC(m0_real)
+AIC(m1_real)
 ```
 
 #### Post Hoc analysis
@@ -181,6 +194,11 @@ If a model that includes the individual better explains the sentiments of tweets
 
 ```{r}
 #include your code and output in the document
+
+# pairwise t test on synthetic data with all individuals compared to each other and themselves 
+pairwise.t.test(semFrame$score, semFrame$Candidate, p.adjust.method = "none")
+pairwise.t.test(semFrame$score, semFrame$Candidate, p.adjust.method = "bonferroni")
+
 ```
 
 #### Report section for a scientific publication
@@ -188,18 +206,72 @@ Write a small section for a scientific publication (journal or a conference), in
 
 ### Bayesian Approach
 For the Bayesian analyses, use the rethinking and/or BayesianFirstAid library
+
 #### Analysis verification
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
 
-```{r}
+```{r , warning=FALSE, message=FALSE, results='hide'}
 #include your analysis code of synthetic data and output in the document
+synthetic$individual <- as.factor(synthetic$individual)
+library(rethinking)
+# m0_bayes <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a,
+#     a ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = synthetic, iter = 10000, chains = 4, cores = 4
+# )
+# m1_bayes <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a + b * individual,
+#     a ~ dnorm(0, 10),
+#     b ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = synthetic, iter = 10000, chains = 4, cores = 4
+# )
+# ```
+  
+# ```{r}
+# precis(m0_bayes)
+# precis(m1_bayes)
 ```
 
 #### Model comparison
 Redo the analysis on the actual tweet data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
 
+```{r , warning=FALSE, message=FALSE, results='hide'}
+# include your analysis code and output in the document
+semFrame$Candidate <- as.factor(semFrame$Candidate)
+# revert to the original data frame
+library(rethinking)
+m0_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a,
+    a ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
+m1_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a + b * Candidate,
+    a ~ dnorm(0, 10),
+    b ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
+```
+  
 ```{r}
-#include your code and output in the document
+precis(m0_bayes_real)
+precis(m1_bayes_real)
 ```
 
 #### Comparison individual/organisation pair
@@ -207,12 +279,17 @@ Compare sentiments of individual pairs and provide a brief interpretation (e.g. 
 
 ```{r}
 #include your code and output in the document
+# compare donald trump and hillary clinton
+
+
 ```
 
 ## Question 2 - Website visits (between groups - Two factors)
 
 ### Conceptual model
-Make a conceptual model underlying this research question
+Make a conceptual model underlying this research question: Does the version of the website, the portal, or a combination of the two had an impact on the number of pages visited.
+
+
 
 ### Specific Mathematical model
 Describe the mathematical model that you fit on the data. Take for this the complete model that you fit on the data. Also, explain your selection for the priors. Assume Gaussian distribution for the number of page visits.
