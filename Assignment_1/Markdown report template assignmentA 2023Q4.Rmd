@@ -291,7 +291,7 @@ Compare sentiments of individual pairs and provide a brief interpretation (e.g. 
 Our ages added up to 65 (23, 22, 21) and 66 % 3 = 0. This means that we had to use the websitevisit2 data set.
   
 ```{r}
-setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
+# setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
 websitevisits <- read.csv("webvisit0.csv", header = TRUE, sep = ",")
 head(websitevisits)
 ```
@@ -329,6 +329,25 @@ Create a synthetic data set with a clear interaction effect between the two fact
 
 ```{r}
 #include your code for generating the synthetic data
+# Set a seed for reproducibility
+set.seed(123)
+# Define the number of samples
+n_samples <- 100
+# Generate 'X' column
+X <- 1:n_samples
+# Generate 'version' column
+# Here we are assuming 'version' is a binary random variable
+version <- sample(c(0, 1), n_samples, replace=TRUE)
+# Generate 'portal' column
+# Here we are assuming 'portal' is a binary random variable
+portal <- sample(c(0, 1), n_samples, replace=TRUE)
+# Generate 'pages' column
+# Here we are assuming 'pages' is a random variable following a normal distribution
+pages <- round(rnorm(n_samples, mean = 10 + 2 * version + 3 * portal + 4 * version * portal, sd = 1))
+# Combine all columns into a data frame
+synthetic_data <- data.frame(X, pages, version, portal)
+# Print the synthetic data
+head(synthetic_data)
 ```
 
 
@@ -338,6 +357,18 @@ Graphically examine the mean page visits for the four different conditions. Give
 
 ```{r}
 #include your code and output in the document
+library(ggplot2)
+
+mean_pages <- aggregate(pages ~ version + portal, websitevisits, mean)
+mean_pages$version <- factor(mean_pages$version, labels = c("Version 0", "Version 1"))
+mean_pages$portal <- factor(mean_pages$portal, labels = c("Portal 0", "Portal 1"))
+
+# Generate plot
+ggplot(mean_pages, aes(x = interaction(version, portal, sep = "-"), y = pages)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Condition (Version-Portal)", y = "Mean page visits") +
+  theme_minimal()
+
 ```
 
 
@@ -348,21 +379,59 @@ Verify your model analysis with synthetic data and show that it can reproduce th
 
 ```{r}
 #include your analysis code of synthetic data and output in the document
+m0 <- lm(pages ~ 1, data = synthetic_data)
+m1 <- lm(pages ~ version, data = synthetic_data)
+m2 <- lm(pages ~ portal, data = synthetic_data)
+m3 <- lm(pages ~ version + portal, data = synthetic_data)
+m4 <- lm(pages ~ version * portal, data = synthetic_data)
+
+# Compare models
+anova(m0, m1, m2, m3, m4, test="Chisq")
+summary(m4)
 ```
 
 #### Model analysis with Gaussian distribution assumed
 Redo the analysis now on the real data set. Assume Gaussian distribution for the number of page visits. Provide a short interpretation of the results, with an interpretation of AICc, F-value, p-value, etc.
 
-
 ```{r}
 #include your code and output in the document
+m0 <- lm(pages ~ 1, data = websitevisits)
+m1 <- lm(pages ~ version, data = websitevisits)
+m2 <- lm(pages ~ portal, data = websitevisits)
+m3 <- lm(pages ~ version + portal, data = websitevisits)
+m4 <- lm(pages ~ version * portal, data = websitevisits)
+
+# Compare models
+anova(m0, m1, m2, m3, m4, test="Chisq")
+summary(m4)
 ```
 
 #### Assumption analysis
-Redo the analysis on the real tweet data set.  This time assume a Poisson distribution for the number of page visits. For the best fitting models (Gaussian and Poisson), examine graphically the distribution of the residuals for the model that assumes Gaussian distribution and the model that assumes Poisson distribution. Give a brief interpretation of Poisson and Gaussian distribution assumptions.
+Redo the analysis on the real website visit data set.  This time assume a Poisson distribution for the number of page visits. For the best fitting models (Gaussian and Poisson), examine graphically the distribution of the residuals for the model that assumes Gaussian distribution and the model that assumes Poisson distribution. Give a brief interpretation of Poisson and Gaussian distribution assumptions.
 
 ```{r}
 #include your code and output in the document
+# Gaussian distribution
+m4 <- lm(pages ~ version * portal, data = websitevisits)
+# Poisson distribution
+m4_poisson <- glm(pages ~ version * portal, data = websitevisits, family = "poisson")
+
+# # Compare models
+summary(m4)
+summary(m4_poisson)
+
+# Plot residuals as QQ plots
+par(mfrow = c(1, 2))
+plot(m4, which = 1)
+plot(m4_poisson, which = 1)
+
+par(mfrow = c(1, 2))
+qqnorm(residuals(m4))
+qqline(residuals(m4))
+qqnorm(residuals(m4_poisson))
+qqline(residuals(m4_poisson))
+```
+
 ```
 
 
