@@ -66,7 +66,7 @@ Alternatively, a permutation test can be used as a non-parametric approach. It a
 
 ##### Loaded tweets of Hillary Clinton, Donald Trump and Bernie Sanders from the .txt files provided in the assignment.
 ```{r}
-setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
+# setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
 getwd()
 tweets_B <- read.table("tweets_B.txt",sep="\n",header=T)
 tweets_B <- tweets_B[seq(1, nrow(tweets_B), 2), ]
@@ -111,6 +111,7 @@ This is visualised in the diagram below:
 ```{r}
 knitr::include_graphics("conceptualModel.png")
 ```
+
 ### Model description
 Describe the mathematical model fitted on the most extensive model. (hint, look at the mark down file of the lectures to see example on formulate mathematical models in markdown). Assume a Gaussian distribution for the tweet’s sentiments rating. Justify the priors.
 
@@ -244,34 +245,34 @@ library(rethinking)
 Redo the analysis on the actual tweet data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
 
 ```{r , warning=FALSE, message=FALSE, results='hide'}
-# include your analysis code and output in the document
-semFrame$Candidate <- as.factor(semFrame$Candidate)
-# revert to the original data frame
-library(rethinking)
-m0_bayes_real <- map2stan(
-  alist(
-    sentiment ~ dnorm(mu, sigma),
-    mu <- a,
-    a ~ dnorm(0, 10),
-    sigma ~ dexp(1)
-  ),
-  data = semFrame, iter = 10000, chains = 4, cores = 4
-)
-m1_bayes_real <- map2stan(
-  alist(
-    sentiment ~ dnorm(mu, sigma),
-    mu <- a + b * Candidate,
-    a ~ dnorm(0, 10),
-    b ~ dnorm(0, 10),
-    sigma ~ dexp(1)
-  ),
-  data = semFrame, iter = 10000, chains = 4, cores = 4
-)
+# # include your analysis code and output in the document
+# semFrame$Candidate <- as.factor(semFrame$Candidate)
+# # revert to the original data frame
+# library(rethinking)
+# m0_bayes_real <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a,
+#     a ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = semFrame, iter = 10000, chains = 4, cores = 4
+# )
+# m1_bayes_real <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a + b * Candidate,
+#     a ~ dnorm(0, 10),
+#     b ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = semFrame, iter = 10000, chains = 4, cores = 4
+# )
 ```
   
 ```{r}
-precis(m0_bayes_real)
-precis(m1_bayes_real)
+# precis(m0_bayes_real)
+# precis(m1_bayes_real)
 ```
 
 #### Comparison individual/organisation pair
@@ -286,13 +287,42 @@ Compare sentiments of individual pairs and provide a brief interpretation (e.g. 
 
 ## Question 2 - Website visits (between groups - Two factors)
 
+### Loading the data
+Our ages added up to 65 (23, 22, 21) and 66 % 3 = 0. This means that we had to use the websitevisit2 data set.
+  
+```{r}
+setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
+websitevisits <- read.csv("webvisit0.csv", header = TRUE, sep = ",")
+head(websitevisits)
+```
+
+
 ### Conceptual model
 Make a conceptual model underlying this research question: Does the version of the website, the portal, or a combination of the two had an impact on the number of pages visited.
 
+Based on the conceptual model on the research question our conceptual model consists of the following factors:
+- Independent variables: Portal (2 levels), Version (2 levels)
+- Dependent variable: Number of pages visited
+
+This is visualised in the diagram below:
+```{r}
+knitr::include_graphics("conceptualModel2.png")
+```
 
 
 ### Specific Mathematical model
 Describe the mathematical model that you fit on the data. Take for this the complete model that you fit on the data. Also, explain your selection for the priors. Assume Gaussian distribution for the number of page visits.
+
+The mathematical model that we fit on the data is a linear model. The model is described by the following formula:
+
+$$
+y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i1}x_{i2} + \epsilon_i
+$$
+  
+Where $y_i$ is the number of pages visited by participant $i$, $x_{i1}$ is the portal used by participant $i$, 
+$x_{i2}$ is the version of the website used by participant $i$ and $\epsilon_i$ is the error term for participant $i$. 
+The $\beta$'s are the coefficients of the model. $\beta_0$ is the intercept, $\beta_1$ is the effect of the portal, 
+$\beta_2$ is the effect of the version and $\beta_3$ is the interaction effect between the portal and the version.
 
 ### Create Synthetic data
 Create a synthetic data set with a clear interaction effect between the two factors for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data.
