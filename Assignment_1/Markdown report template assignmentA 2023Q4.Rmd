@@ -68,20 +68,20 @@ Alternatively, a permutation test can be used as a non-parametric approach. It a
 ```{r}
 # setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_1")
 getwd()
-tweets_B <- read.table("tweets_B.txt",sep="\n",header=T)
+tweets_B <- read.table("tweets_B.txt", sep = "\n", header = T)
 tweets_B <- tweets_B[seq(1, nrow(tweets_B), 2), ]
 
-tweets_C <- read.table("tweets_C.txt",sep="\n",header=T)
+tweets_C <- read.table("tweets_C.txt", sep = "\n", header = T)
 tweets_C <- tweets_C[seq(1, nrow(tweets_C), 2), ]
 
-tweets_T <- read.table("tweets_T.txt",sep="\n",header=T)
+tweets_T <- read.table("tweets_T.txt", sep = "\n", header = T)
 tweets_T <- tweets_T[seq(1, nrow(tweets_T), 2), ]
 
-#taken from https://github.com/mjhea0/twitter-sentiment-analysis
-pos <- scan('positive-words.txt', what = 'character', comment.char=';') #read the positive words
-neg <- scan('negative-words.txt', what = 'character', comment.char=';') #read the negative words
+# taken from https://github.com/mjhea0/twitter-sentiment-analysis
+pos <- scan("positive-words.txt", what = "character", comment.char = ";") # read the positive words
+neg <- scan("negative-words.txt", what = "character", comment.char = ";") # read the negative words
 
-source("sentiment3.R") #load algorithm
+source("sentiment3.R") # load algorithm
 # see sentiment3.R form more information about sentiment analysis. It assigns a intereger score
 # by subtracting the number of occurrence of negative words from that of positive words
 
@@ -90,14 +90,14 @@ analysis_C <- score.sentiment(tweets_C, pos, neg)
 analysis_B <- score.sentiment(tweets_B, pos, neg)
 
 
-sem<-data.frame(analysis_T$score, analysis_C$score, analysis_B$score)
+sem <- data.frame(analysis_T$score, analysis_C$score, analysis_B$score)
 
 library(reshape2)
-semFrame <-melt(sem, measured=c(analysis_T.score,analysis_C.score, analysis_B.score ))
+semFrame <- melt(sem, measured = c(analysis_T.score, analysis_C.score, analysis_B.score))
 names(semFrame) <- c("Candidate", "score")
-semFrame$Candidate <-factor(semFrame$Candidate, labels=c("Donald Trump", "Hillary Clinton", "Bernie Sanders")) # change the labels for your individual/organisation
+semFrame$Candidate <- factor(semFrame$Candidate, labels = c("Donald Trump", "Hillary Clinton", "Bernie Sanders")) # change the labels for your individual/organisation
 head(semFrame)
-#The data you need for the analyses can be found in semFrame
+# The data you need for the analyses can be found in semFrame
 ```
 
 ### Conceptual model
@@ -126,26 +126,31 @@ Where $y_i$ is the sentiment of the tweet, $\beta_0$ is the intercept, $\beta_1$
 Create a synthetic data set with a clear difference between tweets’ sentiments of celebrities for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data. (hint, look at class lecture slides of lecture on Generalized linear models for example to create synthetic data)
 Coefficients: we pick values between -3 and 5 since we found those values in the original dataset, and pick 300 numbers. If a value is picked we replace this value so it can be picked again.
 ```{r}
-#include your code for generating the synthetic data and output in the document
+# #include your code for generating the synthetic data and output in the document
 
-# Set the seed for reproducibility
-set.seed(123)
+set.seed(123) # for reproducibility
 
-# Create the synthetic data frame
+# Set the baseline sentiment (β_0), and the sentiment effect for each individual (β_1)
+beta_0 <- 0
+beta_1 <- c("Donald Trump" = 1, "Hillary Clinton" = 2, "Bernie Sanders" = 3)
+
+# Create a vector of individuals, repeated 100 times each
+individuals <- rep(c("Donald Trump", "Hillary Clinton", "Bernie Sanders"), each = 100)
+
+# Calculate the sentiment for each individual
+sentiment <- beta_0 + beta_1[individuals] + rnorm(length(individuals), mean = 0, sd = 1)
+
+# Create a data frame with the results
 synthetic <- data.frame(
-  individual = c(rep("Donald Trump", 100), rep("Hillary Clinton", 100), rep("Bernie Sanders", 100)),
-  sentiment = sample(-3:5, size = 300, replace = TRUE)
+  individual = individuals,
+  sentiment = sentiment
 )
-head(synthetic)
-
-# print data types of the columns
-str(synthetic)
 ```
 ### Visual inspection Mean and distribution sentiments
 Graphically examine the mean and distribution sentiments of tweets for each individual/organisation, and provide interpretation
 
 ```{r}
-#include your analysis code and output in the document
+# include your analysis code and output in the document
 
 # Plot the mean sentiment for each individual for synthetic data
 library(ggplot2)
@@ -160,8 +165,10 @@ mean_data <- aggregate(score ~ Candidate, data = semFrame, FUN = mean)
 ggplot() +
   geom_boxplot(data = semFrame, aes(x = Candidate, y = score)) +
   geom_jitter(data = semFrame, aes(x = Candidate, y = score), width = 0.2, height = 0, alpha = 0.5) +
-  geom_point(data = mean_data, aes(x = Candidate, y = score, fill = "Mean"),
-             shape = 23, size = 3) +
+  geom_point(
+    data = mean_data, aes(x = Candidate, y = score, fill = "Mean"),
+    shape = 23, size = 3
+  ) +
   labs(x = "Individual", y = "Sentiment", title = "Distribution of sentiment for each individual") +
   scale_fill_manual(name = "Legend", values = "red", guide = guide_legend(override.aes = list(shape = 23)))
 ```
@@ -174,29 +181,33 @@ The median of the sentitment is 0 for all candidates and while the mean for Clin
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of AICc, F-value, p-value etc.
 
 ```{r}
-#include your analysis code of synthetic data and output in the document
+# include your analysis code of synthetic data and output in the document
 m0 <- lm(sentiment ~ 1, data = synthetic)
 m1 <- lm(sentiment ~ individual, data = synthetic)
+summary(m1)
 anova(m0, m1)
-AIC(m0)
-AIC(m1)
+AIC(m0, m1)
 ```
 
-The table shows that Model 2 provides a significantly better fit to the data compared to Model 1 (Pr(>F) = 0.0008022). This suggests that the candidate has a significant impact on the sentiment variable.
-The lower the AIC value, the better the model. Model 2 (AIC = 1421.824) has a lower AIC value compared to Model 1 (AIC = 1432.224). This suggests that Model 2 provides a better fit to the data, considering both the explanatory power and the complexity of the model.
+In the synthetic data generation, the sentiment means for "Donald Trump", "Hillary Clinton", and "Bernie Sanders" were set as 1, 2, and 3, respectively. 
+Upon running a linear model on the synthetic data, the estimated coefficients accurately represented the means and differences used in the data generation process. 
+The intercept, representing Bernie Sanders' sentiment mean, was correctly estimated around 3. 
+The coefficients for "Donald Trump" and "Hillary Clinton" represented the differences in sentiment from Bernie Sanders, which were accurately estimated around -2 and -1, respectively. 
+These small discrepancies arise from the random noise added during data generation. Thus, the model has effectively reproduced the coefficients from the data generation process.
 
-Based on these results, it can be concluded that the analysis with synthetic data successfully reproduces the coefficients of the linear model used to generate the data. The p-value in the ANOVA table indicates that the candidate has a significant effect on the "sentiment" variable. The AIC values confirm that Model 2, which includes the candidate, provides a better fit to the data compared to Model 1.
+The model m1, with a lower AIC value of 821.45 compared to m0's 992.25, indicates a better fit to the data while considering model complexity. 
+The F-statistic and the associated p-value would shed light on the overall significance of the model - if the p-value is less than the conventional 0.05 threshold, it indicates the predictors in the model significantly improve its fit compared to an intercept-only model. 
 
 #### Linear model
 Redo the analysis now on the real tweet data set. Provide a short interpretation of the results, with an interpretation of AICc, F-value, p-value, etc.
 
 ```{r}
-#include your analysis code and output in the document
+# include your analysis code and output in the document
 m0_real <- lm(score ~ 1, data = semFrame)
 m1_real <- lm(score ~ Candidate, data = semFrame)
+summary(m1_real)
 anova(m0_real, m1_real)
-AIC(m0_real)
-AIC(m1_real)
+AIC(m0_real, m1_real)
 ```
 
 For the real data, the same holds as for the synthetic data. The P-value is even smaller and F-value is even bigger. Meaning that the difference is bigger than with the synthetic data.
@@ -205,12 +216,11 @@ For the real data, the same holds as for the synthetic data. The P-value is even
 If a model that includes the individual better explains the sentiments of tweets than a model without such predictor, conduct a posthoc analysis with, e.g., Bonferroni correction to examine which celebrity tweets differ from the other individual’s tweets. Provide a brief interpretation of the results.
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 
-# pairwise t test on synthetic data with all individuals compared to each other and themselves 
+# pairwise t test on synthetic data with all individuals compared to each other and themselves
 # pairwise.t.test(semFrame$score, semFrame$Candidate, p.adjust.method = "none")
 pairwise.t.test(semFrame$score, semFrame$Candidate, p.adjust.method = "bonferroni")
-
 ```
 
 The difference in sentiment of the tweets is significant with Bonferroni correction with a P-value of 1.4e-6 between Trump and Clinton and 3.6e-5 between Trump and Sanders. There is no significant difference in the sentiment of the tweets between Clinton and Sanders.
@@ -241,33 +251,34 @@ For the Bayesian analyses, use the rethinking and/or BayesianFirstAid library
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
 
 ```{r , warning=FALSE, message=FALSE, results='hide'}
-#include your analysis code of synthetic data and output in the document
+# include your analysis code of synthetic data and output in the document
 synthetic$individual <- as.factor(synthetic$individual)
 library(rethinking)
-# m0_bayes <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a,
-#     a ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = synthetic, iter = 10000, chains = 4, cores = 4
-# )
-# m1_bayes <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a + b * individual,
-#     a ~ dnorm(0, 10),
-#     b ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = synthetic, iter = 10000, chains = 4, cores = 4
-# )
-# ```
+m0_bayes <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a,
+    a ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = synthetic, iter = 10000, chains = 4, cores = 4
+)
+m1_bayes <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a + b*individual,
+    a ~ dnorm(0, 10),
+    b[individual] ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = synthetic, iter = 10000, chains = 4, cores = 4
+)
+```
   
-# ```{r}
-# precis(m0_bayes)
-# precis(m1_bayes)
+```{r}
+precis(m0_bayes)
+precis(m1_bayes, depth = 2)
+compare(m0_bayes, m1_bayes)
 ```
 
 #### Model comparison
@@ -308,10 +319,8 @@ Redo the analysis on the actual tweet data set. Provide a short interpretation o
 Compare sentiments of individual pairs and provide a brief interpretation (e.g. CIs) 
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 # compare donald trump and hillary clinton
-
-
 ```
 
 ## Question 2 - Website visits (between groups - Two factors)
@@ -357,7 +366,7 @@ $\beta_2$ is the effect of the version and $\beta_3$ is the interaction effect b
 Create a synthetic data set with a clear interaction effect between the two factors for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data.
 
 ```{r}
-#include your code for generating the synthetic data
+# include your code for generating the synthetic data
 # Set a seed for reproducibility
 set.seed(123)
 # Define the number of samples
@@ -366,10 +375,10 @@ n_samples <- 100
 X <- 1:n_samples
 # Generate 'version' column
 # Here we are assuming 'version' is a binary random variable
-version <- sample(c(0, 1), n_samples, replace=TRUE)
+version <- sample(c(0, 1), n_samples, replace = TRUE)
 # Generate 'portal' column
 # Here we are assuming 'portal' is a binary random variable
-portal <- sample(c(0, 1), n_samples, replace=TRUE)
+portal <- sample(c(0, 1), n_samples, replace = TRUE)
 # Generate 'pages' column
 # Here we are assuming 'pages' is a random variable following a normal distribution
 pages <- round(rnorm(n_samples, mean = 10 + 2 * version + 3 * portal + 4 * version * portal, sd = 1))
@@ -385,7 +394,7 @@ Graphically examine the mean page visits for the four different conditions. Give
 
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 library(ggplot2)
 
 mean_pages <- aggregate(pages ~ version + portal, websitevisits, mean)
@@ -397,7 +406,6 @@ ggplot(mean_pages, aes(x = interaction(version, portal, sep = "-"), y = pages)) 
   geom_bar(stat = "identity") +
   labs(x = "Condition (Version-Portal)", y = "Mean page visits") +
   theme_minimal()
-
 ```
 
 
@@ -407,7 +415,7 @@ ggplot(mean_pages, aes(x = interaction(version, portal, sep = "-"), y = pages)) 
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of AICc, F-value, p-value etc.
 
 ```{r}
-#include your analysis code of synthetic data and output in the document
+# include your analysis code of synthetic data and output in the document
 m0 <- lm(pages ~ 1, data = synthetic_data)
 m1 <- lm(pages ~ version, data = synthetic_data)
 m2 <- lm(pages ~ portal, data = synthetic_data)
@@ -415,7 +423,7 @@ m3 <- lm(pages ~ version + portal, data = synthetic_data)
 m4 <- lm(pages ~ version * portal, data = synthetic_data)
 
 # Compare models
-anova(m0, m1, m2, m3, m4, test="Chisq")
+anova(m0, m1, m2, m3, m4, test = "Chisq")
 summary(m4)
 ```
 
@@ -424,7 +432,7 @@ Redo the analysis now on the real data set. Assume Gaussian distribution for the
 
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 m0 <- lm(pages ~ 1, data = websitevisits)
 m1 <- lm(pages ~ version, data = websitevisits)
 m2 <- lm(pages ~ portal, data = websitevisits)
@@ -432,7 +440,7 @@ m3 <- lm(pages ~ version + portal, data = websitevisits)
 m4 <- lm(pages ~ version * portal, data = websitevisits)
 
 # Compare models
-anova(m0, m1, m2, m3, m4, test="Chisq")
+anova(m0, m1, m2, m3, m4, test = "Chisq")
 summary(m4)
 ```
 
@@ -440,7 +448,7 @@ summary(m4)
 Redo the analysis on the real website visit data set.  This time assume a Poisson distribution for the number of page visits. For the best fitting models (Gaussian and Poisson), examine graphically the distribution of the residuals for the model that assumes Gaussian distribution and the model that assumes Poisson distribution. Give a brief interpretation of Poisson and Gaussian distribution assumptions.
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 # Gaussian distribution
 m4 <- lm(pages ~ version * portal, data = websitevisits)
 # Poisson distribution
@@ -462,17 +470,33 @@ qqnorm(residuals(m4_poisson))
 qqline(residuals(m4_poisson))
 ```
 
-```
-
 
 #### Simple effect analysis
 Continue with the model that assumes a Poisson distribution. If the analysis shows a significant two-way interaction effect, conduct a Simple Effect analysis to explore this interaction effect in more detail. Provide a brief interpretation of the results.
 
-
 ```{r}
-#include your code and output in the document
-```
+# include your code and output in the document
+# Poisson distribution
+summary(m4_poisson)
 
+# Simple effect analysis
+head(websitevisits$version)
+head(websitevisits$portal)
+websitevisits$simple <- interaction(websitevisits$version, websitevisits$portal)
+levels(websitevisits$simple)
+
+contrastSimple <- c(1, -1, 0, 0) # old consumers
+contrastComplex <- c(0, 0, 1, -1) # new companies
+
+SimpleEff <- cbind(contrastSimple, contrastComplex)
+contrasts(websitevisits$simple) <- SimpleEff # now we link the two contrasts with the factor simple
+
+simpleEffectModel <- lm(pages ~ simple, data = websitevisits)
+summary(simpleEffectModel)
+```
+The linear model applied to the website visit data, with page visits as the dependent variable and the interaction between portal and version as independent variables, explained approximately 90.36% of the variation in page visits. 
+Both the simple (version 0 portal 0 vs version 0 portal 1) and complex (version 1 portal 0 vs version 1 portal 1) contrast terms were statistically significant, indicating there are differences in page visits for these portal-version combinations. 
+The model was statistically significant, affirming that both website version and portal type significantly impact the number of pages visited by users.
 
 #### Report section for a scientific publication
 Write a small section for a scientific publication, in which you report the results of the analyses, and explain the conclusions that can be drawn.
@@ -480,27 +504,73 @@ Write a small section for a scientific publication, in which you report the resu
 ### Bayesian Approach
 For the Bayesian analyses, use the rethinking and/or BayesianFirstAid library
 
-####  Verification Analysis
-Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
-
-
-```{r}
-#include your analysis code of synthetic data and output in the document
-```
-
-
 #### Model description
 
 Describe the mathematical model fitted on the most extensive model. (hint, look at the mark down file of the lectures to see example on formulate mathematical models in markdown). Assume Poisson distribution for the number of page visits. Justify the priors.
+
+The mathematical model fitted on the most extensive model is as follows:
+
+$$
+\begin{aligned}
+\text{pages} &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \alpha + \beta_{\text{version}} \cdot \text{version} + \beta_{\text{portal}} \cdot \text{portal} + \beta_{\text{version_portal}} \cdot \text{version} \cdot \text{portal} \\
+\alpha &\sim \text{Normal}(0, 10) \\
+\beta_{\text{version}} &\sim \text{Normal}(0, 10) \\
+\beta_{\text{portal}} &\sim \text{Normal}(0, 10) \\
+\beta_{\text{version_portal}} &\sim \text{Normal}(0, 10) \\
+\end{aligned}
+$$
+
+The priors are justified as follows:
+
+
+
+####  Verification Analysis
+Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
+
+```{r, warning=FALSE, message=FALSE, results='hide'}
+# include your analysis code of synthetic data and output in the document
+library(rethinking)
+m_synthetic <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(0, 10), # Prior for intercept
+    beta_version ~ dnorm(0, 10), # Prior for version coefficient
+    beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
+    beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
+  ),
+  data = synthetic_data, iter = 10000, chains = 4, cores = 4
+)
+```
+```{r}
+precis(m_synthetic, depth = 1, prob = 0.95)
+```
 
 #### Model comparison
 
 Redo the analysis on actual data. Assume Poisson distribution for the number of page visits. Provide brief interpretation of the analysis results (e.g. WAIC, and 95% credibility interval of coefficients).
 
-```{r}
-#include your code and output in the document
+```{r, warning=FALSE, message=FALSE, results='hide'}
+# include your code and output in the document
+library(rethinking)
+m_actual <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(0, 10), # Prior for intercept
+    beta_version ~ dnorm(0, 10), # Prior for version coefficient
+    beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
+    beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
+  ),
+  data = websitevisits, iter = 10000, chains = 4, cores = 4
+)
 ```
+```{r}
+precis(m_actual, depth = 1, prob = 0.95)
 
+compare(m_synthetic, m_actual)
+```
 
 
 # Part 3 - Multilevel model
@@ -510,7 +580,7 @@ Use graphics to inspect the distribution of the score, and relationship between 
 
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 ```
 
 ## Frequentist approach
@@ -523,7 +593,7 @@ Conduct multilevel analysis and calculate 95% confidence intervals thereby assum
 
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 ```
 
 ### Report section for a scientific publication
@@ -541,7 +611,7 @@ Describe the mathematical model fitted on the most extensive model. (hint, look 
 Compare models with with increasing complexity. 
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 ```
 
 ### Estimates examination
@@ -550,7 +620,7 @@ Examine the estimate of parameters of the model with best fit, and provide a bri
 
 
 ```{r}
-#include your code and output in the document
+# include your code and output in the document
 ```
 
 
