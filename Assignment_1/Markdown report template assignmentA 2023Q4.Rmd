@@ -254,31 +254,31 @@ Verify your model analysis with synthetic data and show that it can reproduce th
 # include your analysis code of synthetic data and output in the document
 synthetic$individual <- as.factor(synthetic$individual)
 library(rethinking)
-m0_bayes <- map2stan(
-  alist(
-    sentiment ~ dnorm(mu, sigma),
-    mu <- a,
-    a ~ dnorm(0, 10),
-    sigma ~ dexp(1)
-  ),
-  data = synthetic, iter = 10000, chains = 4, cores = 4
-)
-m1_bayes <- map2stan(
-  alist(
-    sentiment ~ dnorm(mu, sigma),
-    mu <- a + b[individual],
-    a ~ dnorm(0, 10),
-    b[individual] ~ dnorm(0, 10),
-    sigma ~ dexp(1)
-  ),
-  data = synthetic, iter = 10000, chains = 4, cores = 4
-)
+# m0_bayes <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a,
+#     a ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = synthetic, iter = 10000, chains = 4, cores = 4
+# )
+# m1_bayes <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a + b[individual],
+#     a ~ dnorm(0, 10),
+#     b[individual] ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = synthetic, iter = 10000, chains = 4, cores = 4
+# )
 ```
   
 ```{r}
-precis(m0_bayes)
-precis(m1_bayes)
-compare(m0_bayes, m1_bayes)
+# precis(m0_bayes)
+# precis(m1_bayes)
+# compare(m0_bayes, m1_bayes)
 ```
 
 #### Model comparison
@@ -289,30 +289,30 @@ Redo the analysis on the actual tweet data set. Provide a short interpretation o
 semFrame$Candidates <- as.factor(semFrame$Candidate)
 # revert to the original data frame
 library(rethinking)
-m0_bayes_real <- map2stan(
-  alist(
-    sentiment ~ dnorm(mu, sigma),
-    mu <- a,
-    a ~ dnorm(0, 10),
-    sigma ~ dexp(1)
-  ),
-  data = semFrame, iter = 10000, chains = 4, cores = 4
-)
-m1_bayes_real <- map2stan(
-  alist(
-    sentiment ~ dnorm(mu, sigma),
-    mu <- a + b[Candidates],
-    a ~ dnorm(0, 10),
-    b[Candidates] ~ dnorm(0, 10),
-    sigma ~ dexp(1)
-  ),
-  data = semFrame, iter = 10000, chains = 4, cores = 4
-)
+# m0_bayes_real <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a,
+#     a ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = semFrame, iter = 10000, chains = 4, cores = 4
+# )
+# m1_bayes_real <- map2stan(
+#   alist(
+#     sentiment ~ dnorm(mu, sigma),
+#     mu <- a + b[Candidates],
+#     a ~ dnorm(0, 10),
+#     b[Candidates] ~ dnorm(0, 10),
+#     sigma ~ dexp(1)
+#   ),
+#   data = semFrame, iter = 10000, chains = 4, cores = 4
+# )
 ```
   
 ```{r}
-precis(m0_bayes_real)
-precis(m1_bayes_real)
+# precis(m0_bayes_real)
+# precis(m1_bayes_real)
 ```
 
 #### Comparison individual/organisation pair
@@ -531,20 +531,20 @@ Verify your model analysis with synthetic data and show that it can reproduce th
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 # include your analysis code of synthetic data and output in the document
 library(rethinking)
-m_synthetic <- map2stan(
-  alist(
-    pages ~ dpois(lambda),
-    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
-    intercept ~ dnorm(0, 10), # Prior for intercept
-    beta_version ~ dnorm(0, 10), # Prior for version coefficient
-    beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
-    beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
-  ),
-  data = synthetic_data, iter = 10000, chains = 4, cores = 4
-)
+# m_synthetic <- map2stan(
+#   alist(
+#     pages ~ dpois(lambda),
+#     log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+#     intercept ~ dnorm(0, 10), # Prior for intercept
+#     beta_version ~ dnorm(0, 10), # Prior for version coefficient
+#     beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
+#     beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
+#   ),
+#   data = synthetic_data, iter = 10000, chains = 4, cores = 4
+# )
 ```
 ```{r}
-precis(m_synthetic, depth = 1, prob = 0.95)
+# precis(m_synthetic, depth = 1, prob = 0.95)
 ```
 
 #### Model comparison
@@ -554,20 +554,20 @@ Redo the analysis on actual data. Assume Poisson distribution for the number of 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 # include your code and output in the document
 library(rethinking)
-m_actual <- map2stan(
-  alist(
-    pages ~ dpois(lambda),
-    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
-    intercept ~ dnorm(0, 10), # Prior for intercept
-    beta_version ~ dnorm(0, 10), # Prior for version coefficient
-    beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
-    beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
-  ),
-  data = websitevisits, iter = 10000, chains = 4, cores = 4
-)
+# m_actual <- map2stan(
+#   alist(
+#     pages ~ dpois(lambda),
+#     log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+#     intercept ~ dnorm(0, 10), # Prior for intercept
+#     beta_version ~ dnorm(0, 10), # Prior for version coefficient
+#     beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
+#     beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
+#   ),
+#   data = websitevisits, iter = 10000, chains = 4, cores = 4
+# )
 ```
 ```{r}
-precis(m_actual, depth = 1, prob = 0.95)
+# precis(m_actual, depth = 1, prob = 0.95)
 
 ```
 
@@ -625,7 +625,7 @@ Conduct multilevel analysis and calculate 95% confidence intervals thereby assum
 ```{r}
 # include your code and output in the document
 library(nlme)
-m1 <- lme(score ~ session, random = ~ 1 | subject, data = set0)
+m1 <- lme(score ~ session, random = ~ 1 | subject, data = set0, method = "ML")
 summary(m1)
 conf_int <- intervals(m1, level = 0.95)
 conf_int
@@ -641,12 +641,86 @@ For the Bayesian analyses, use the rethinking and/or BayesianFirstAid library
 
 Describe the mathematical model fitted on the most extensive model. (hint, look at the mark down file of the lectures to see example on formulate mathematical models in markdown).  Assume a Gaussian distribution for the scores. Justify the priors.
 
+The mathematical model that is fitted on the most extensive model is as follows:
+
+$$
+\begin{aligned}
+\text{score} &\sim \text{Normal}(\mu, \sigma) \\
+\mu &= \alpha + \beta_{\text{session}} \cdot \text{session} + \beta_{\text{subject}} \cdot \text{subject} + \beta_{\text{session, subject}} \cdot \text{session} \cdot \text{subject} \\
+\alpha &\sim \text{Normal}(0, 10) \\
+\beta_{\text{session}} &\sim \text{Normal}(0, 10) \\
+\sigma &\sim \text{Exponential}(1) \\
+\end{aligned}
+$$
+
+The priors are justified as follows:
+
+* $\alpha$: The intercept is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the intercept and we assume that the intercept is normally distributed.
+* $\beta_{\text{session}}$: The slope is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the slope and we assume that the slope is normally distributed.
+* $\beta_{\text{subject}}$: The slope is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the slope and we assume that the slope is normally distributed.
+* $\beta_{\text{session, subject}}$: The slope is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the slope and we assume that the slope is normally distributed.
+* $\sigma$: The standard deviation is assumed to be exponentially distributed with a rate of 1. This is because we do not have any prior knowledge about the standard deviation and we assume that the standard deviation is exponentially distributed.
+
 ### Model comparison
 
 Compare models with with increasing complexity. 
 
 ```{r}
 # include your code and output in the document
+library(rethinking)
+m0_set0 <- map2stan(
+  alist(
+    score ~ dnorm(mu, sigma),
+    mu <- a + a[subject],
+    # adaptive priors
+    a[subject] ~ dnorm(0, sigma_subject),
+    # hyperpriors
+    sigma_subject ~ dnorm(0, 10),
+    # fixed priors
+    a ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = set0, iter = 10000, chains = 4, cores = 4
+)
+precis(m0_set0, depth = 1, prob = 0.95)
+
+m1_set0 <- map2stan(
+  alist(
+    score ~ dnorm(mu, sigma),
+    mu <- a + a[subject] + b_session * session ,
+    # adaptive priors
+    a[subject] ~ dnorm(0, sigma_subject),
+    # hyperpriors
+    sigma_subject ~ dnorm(0, 10),
+    # fixed priors
+    a ~ dnorm(0, 10),
+    b_session ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = set0, iter = 10000, chains = 4, cores = 4
+)
+precis(m1_set0, depth = 1, prob = 0.95)
+
+m2_set0 <- map2stan(
+  alist(
+    score ~ dnorm(mu, sigma),
+    mu <- a + a[subject] + b_session * session + c_session_subject * subject *,
+    # adaptive priors
+    a[subject] ~ dnorm(0, sigma_subject),
+    # hyperpriors
+    sigma_subject ~ dnorm(0, 10),
+    # fixed priors
+    a ~ dnorm(0, 10),
+    b_session ~ dnorm(0, 10),
+    c_session_subject ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = set0, iter = 10000, chains = 4, cores = 4
+)
+precis(m2_set0, depth = 1, prob = 0.95)
+
+compare(m0_set0, m1_set0, m2_set0)
+
 ```
 
 ### Estimates examination
