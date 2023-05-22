@@ -10,6 +10,7 @@ ChickWeight$Chick <- as.numeric(ChickWeight$Chick)
 # fixed and random intercept model using lme
 m0_lme <- lme(weight ~ 1, data=ChickWeight, random = ~ 1 | Chick, method = "ML")
 summary(m0_lme)
+
 v <- VarCorr(m0_lme)
 tau <- as.numeric(v["(Intercept)", "StdDev"])
 sigma <- as.numeric(attr(v, "sc")["Residual", "StdDev"])

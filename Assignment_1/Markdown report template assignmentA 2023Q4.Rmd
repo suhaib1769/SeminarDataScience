@@ -254,31 +254,31 @@ Verify your model analysis with synthetic data and show that it can reproduce th
 # include your analysis code of synthetic data and output in the document
 synthetic$individual <- as.factor(synthetic$individual)
 library(rethinking)
-# m0_bayes <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a,
-#     a ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = synthetic, iter = 10000, chains = 4, cores = 4
-# )
-# m1_bayes <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a + b[individual],
-#     a ~ dnorm(0, 10),
-#     b[individual] ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = synthetic, iter = 10000, chains = 4, cores = 4
-# )
+m0_bayes <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a,
+    a ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = synthetic, iter = 10000, chains = 4, cores = 4
+)
+m1_bayes <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a + b[individual],
+    a ~ dnorm(0, 10),
+    b[individual] ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = synthetic, iter = 10000, chains = 4, cores = 4
+)
 ```
   
 ```{r}
-# precis(m0_bayes)
-# precis(m1_bayes)
-# compare(m0_bayes, m1_bayes)
+precis(m0_bayes)
+precis(m1_bayes)
+compare(m0_bayes, m1_bayes)
 ```
 
 #### Model comparison
@@ -289,30 +289,30 @@ Redo the analysis on the actual tweet data set. Provide a short interpretation o
 semFrame$Candidates <- as.factor(semFrame$Candidate)
 # revert to the original data frame
 library(rethinking)
-# m0_bayes_real <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a,
-#     a ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = semFrame, iter = 10000, chains = 4, cores = 4
-# )
-# m1_bayes_real <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a + b[Candidates],
-#     a ~ dnorm(0, 10),
-#     b[Candidates] ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = semFrame, iter = 10000, chains = 4, cores = 4
-# )
+m0_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a,
+    a ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
+m1_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a + b[Candidates],
+    a ~ dnorm(0, 10),
+    b[Candidates] ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
 ```
   
 ```{r}
-# precis(m0_bayes_real)
-# precis(m1_bayes_real)
+precis(m0_bayes_real)
+precis(m1_bayes_real)
 ```
 
 #### Comparison individual/organisation pair
@@ -387,6 +387,7 @@ synthetic_data <- data.frame(X, pages, version, portal)
 # Print the synthetic data
 head(synthetic_data)
 ```
+10, 2, 3, and 4 were the coefficients used for $\beta_0 , \beta_1 , \beta_2 , \beta_3$ respectively.
 
 
 ### Visual inspection
@@ -407,7 +408,7 @@ ggplot(mean_pages, aes(x = interaction(version, portal, sep = "-"), y = pages)) 
   labs(x = "Condition (Version-Portal)", y = "Mean page visits") +
   theme_minimal()
 ```
-
+When the portal and version are 1, we get the most page visits. When the portal is 0 and the version is 1, we get the least page visits.
 
 ### Frequentist Approach
 
@@ -425,12 +426,15 @@ m4 <- lm(pages ~ version * portal, data = synthetic_data)
 # Compare models
 anova(m0, m1, m2, m3, m4, test = "Chisq")
 summary(m4)
+AIC(m0, m1, m2, m3, m4)
 ```
+The intercept and the coefficients for version, portal, and version:portal are very close to the values used to generate the synthetic data (10, 2.05, 3.16, and 3.22, respectively 10, 2, 3, 4 before), and all coefficients are highly significant (p < 2e-16). This confirms that the model has successfully identified and estimated the underlying relationships in the synthetic data.
+The model with the best fit is m4 as the AIC was the lowest for m4, which is the model that includes the interaction effect.
+The Multiple R-squared value is 0.9103, indicating that the model explains approximately 91% of the variability in page visits.
+The F-statistic is 324.7 (with a highly significant p-value), indicating that the variation explained by our model is significantly greater than the unexplained variation. This further underscores the strength and validity of our model.
 
 #### Model analysis with Gaussian distribution assumed
 Redo the analysis now on the real data set. Assume Gaussian distribution for the number of page visits. Provide a short interpretation of the results, with an interpretation of AICc, F-value, p-value, etc.
-
-
 ```{r}
 # include your code and output in the document
 m0 <- lm(pages ~ 1, data = websitevisits)
@@ -442,7 +446,13 @@ m4 <- lm(pages ~ version * portal, data = websitevisits)
 # Compare models
 anova(m0, m1, m2, m3, m4, test = "Chisq")
 summary(m4)
+# Compare AIC
+AIC(m0, m1, m2, m3, m4)
 ```
+The intercept and the coefficients for version, portal, and version:portal are 19.6280, -7.6239, 13.4663, and 29.8808, respectively, and all coefficients are highly significant (p < 2e-16). This suggests that the linear model has successfully captured the underlying relationships between version, portal, and the interaction term, and the number of page visits.
+The model with the best fit is m4 as the AIC was the lowest for m4, which is the model that includes the interaction effect. 
+The Multiple R-squared value is 0.9036, indicating that the model explains approximately 90% of the variability in page visits.
+The F-statistic is 3110 (with a highly significant p-value), indicating that the variation explained by our model is significantly greater than the unexplained variation.
 
 #### Assumption analysis
 Redo the analysis on the real website visit data set.  This time assume a Poisson distribution for the number of page visits. For the best fitting models (Gaussian and Poisson), examine graphically the distribution of the residuals for the model that assumes Gaussian distribution and the model that assumes Poisson distribution. Give a brief interpretation of Poisson and Gaussian distribution assumptions.
@@ -469,7 +479,8 @@ qqline(residuals(m4))
 qqnorm(residuals(m4_poisson))
 qqline(residuals(m4_poisson))
 ```
-
+The Q-Q plot for m4 where points deviate from the line in the tails suggests that the residuals are not normally distributed.
+On the other hand, the Q-Q plot for m4_poisson where points follow the line suggests that the residuals are consistent with the Poisson distribution.
 
 #### Simple effect analysis
 Continue with the model that assumes a Poisson distribution. If the analysis shows a significant two-way interaction effect, conduct a Simple Effect analysis to explore this interaction effect in more detail. Provide a brief interpretation of the results.
@@ -500,6 +511,13 @@ The model was statistically significant, affirming that both website version and
 
 #### Report section for a scientific publication
 Write a small section for a scientific publication, in which you report the results of the analyses, and explain the conclusions that can be drawn.
+In the present study, we aimed to investigate the effect of website version and portal type on the number of pages visited by users. 
+We found that the model that best fit the data was the model that included the interaction effect between version and portal. 
+We plotted a Q-Q plot for both the Gaussian and Poisson distributions, and found that the residuals did not follow the line for the Gaussian distribution, but were consistent with the Poisson distribution.
+We also conducted a simple effect analysis to explore the interaction effect in more detail. 
+Our analysis revealed a significant effect for version 0 of the website on the number of pages visited, with users estimated to visit approximately 3.81 more pages compared to the baseline (t = 15.56, p < 2e-16).
+In contrast, there was a significantly negative effect for version 1 of the website on page visits, with an estimate indicating that users visited approximately 11.13 fewer pages compared to the baseline (t = -45.96, p < 2e-16).
+However, when considering the interaction effect of the version and portal, there was a significant positive effect, with an estimated 28.41 additional page visits for a one-unit increase in the interaction term (t = 82.48, p < 2e-16).
 
 ### Bayesian Approach
 For the Bayesian analyses, use the rethinking and/or BayesianFirstAid library
@@ -524,27 +542,26 @@ $$
 The priors are justified as follows:
 
 
-
 ####  Verification Analysis
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 # include your analysis code of synthetic data and output in the document
 library(rethinking)
-# m_synthetic <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
-#     intercept ~ dnorm(0, 10), # Prior for intercept
-#     beta_version ~ dnorm(0, 10), # Prior for version coefficient
-#     beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
-#     beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
-#   ),
-#   data = synthetic_data, iter = 10000, chains = 4, cores = 4
-# )
+m_synthetic <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(0, 10), # Prior for intercept
+    beta_version ~ dnorm(0, 10), # Prior for version coefficient
+    beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
+    beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
+  ),
+  data = synthetic_data, iter = 10000, chains = 4, cores = 4
+)
 ```
 ```{r}
-# precis(m_synthetic, depth = 1, prob = 0.95)
+precis(m_synthetic, depth = 1, prob = 0.95)
 ```
 
 #### Model comparison
@@ -554,20 +571,20 @@ Redo the analysis on actual data. Assume Poisson distribution for the number of 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 # include your code and output in the document
 library(rethinking)
-# m_actual <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
-#     intercept ~ dnorm(0, 10), # Prior for intercept
-#     beta_version ~ dnorm(0, 10), # Prior for version coefficient
-#     beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
-#     beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
-#   ),
-#   data = websitevisits, iter = 10000, chains = 4, cores = 4
-# )
+m_actual <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(0, 10), # Prior for intercept
+    beta_version ~ dnorm(0, 10), # Prior for version coefficient
+    beta_portal ~ dnorm(0, 10), # Prior for portal coefficient
+    beta_interaction ~ dnorm(0, 10) # Prior for interaction coefficient
+  ),
+  data = websitevisits, iter = 10000, chains = 4, cores = 4
+)
 ```
 ```{r}
-# precis(m_actual, depth = 1, prob = 0.95)
+precis(m_actual, depth = 1, prob = 0.95)
 
 ```
 
@@ -646,7 +663,7 @@ The mathematical model that is fitted on the most extensive model is as follows:
 $$
 \begin{aligned}
 \text{score} &\sim \text{Normal}(\mu, \sigma) \\
-\mu &= \alpha + \beta_{\text{session}} \cdot \text{session} + \beta_{\text{subject}} \cdot \text{subject} + \beta_{\text{session, subject}} \cdot \text{session} \cdot \text{subject} \\
+\mu &= \alpha + \beta_{\text{session}} \cdot \text{session} + \beta_{\text{subject}} \cdot \text{subject} \\
 \alpha &\sim \text{Normal}(0, 10) \\
 \beta_{\text{session}} &\sim \text{Normal}(0, 10) \\
 \sigma &\sim \text{Exponential}(1) \\
@@ -658,7 +675,6 @@ The priors are justified as follows:
 * $\alpha$: The intercept is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the intercept and we assume that the intercept is normally distributed.
 * $\beta_{\text{session}}$: The slope is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the slope and we assume that the slope is normally distributed.
 * $\beta_{\text{subject}}$: The slope is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the slope and we assume that the slope is normally distributed.
-* $\beta_{\text{session, subject}}$: The slope is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because we do not have any prior knowledge about the slope and we assume that the slope is normally distributed.
 * $\sigma$: The standard deviation is assumed to be exponentially distributed with a rate of 1. This is because we do not have any prior knowledge about the standard deviation and we assume that the standard deviation is exponentially distributed.
 
 ### Model comparison
@@ -668,7 +684,20 @@ Compare models with with increasing complexity.
 ```{r}
 # include your code and output in the document
 library(rethinking)
-m0_set0 <- map2stan(
+m0_set0 <- map2stan( 
+  alist(
+    score ~ dnorm(mu, sigma),
+    mu <- a,
+    # fixed priors
+    a ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = set0, iter = 10000, chains = 4, cores = 4,
+  log_lik = TRUE, control = list(adapt_delta = 0.99)
+)
+precis(m0_set0, depth = 1, prob = 0.95)
+
+m1_set0 <- map2stan(
   alist(
     score ~ dnorm(mu, sigma),
     mu <- a + a[subject],
@@ -680,11 +709,12 @@ m0_set0 <- map2stan(
     a ~ dnorm(0, 10),
     sigma ~ dexp(1)
   ),
-  data = set0, iter = 10000, chains = 4, cores = 4
+  data = set0, iter = 10000, chains = 4, cores = 4,
+  log_lik = TRUE, control = list(adapt_delta = 0.99)
 )
-precis(m0_set0, depth = 1, prob = 0.95)
+precis(m1_set0, depth = 1, prob = 0.95)
 
-m1_set0 <- map2stan(
+m2_set0 <- map2stan(
   alist(
     score ~ dnorm(mu, sigma),
     mu <- a + a[subject] + b_session * session ,
@@ -697,25 +727,8 @@ m1_set0 <- map2stan(
     b_session ~ dnorm(0, 10),
     sigma ~ dexp(1)
   ),
-  data = set0, iter = 10000, chains = 4, cores = 4
-)
-precis(m1_set0, depth = 1, prob = 0.95)
-
-m2_set0 <- map2stan(
-  alist(
-    score ~ dnorm(mu, sigma),
-    mu <- a + a[subject] + b_session * session + c_session_subject * subject *,
-    # adaptive priors
-    a[subject] ~ dnorm(0, sigma_subject),
-    # hyperpriors
-    sigma_subject ~ dnorm(0, 10),
-    # fixed priors
-    a ~ dnorm(0, 10),
-    b_session ~ dnorm(0, 10),
-    c_session_subject ~ dnorm(0, 10),
-    sigma ~ dexp(1)
-  ),
-  data = set0, iter = 10000, chains = 4, cores = 4
+  data = set0, iter = 10000, chains = 4, cores = 4,
+  log_lik = TRUE, control = list(adapt_delta = 0.99)
 )
 precis(m2_set0, depth = 1, prob = 0.95)
 
@@ -730,6 +743,7 @@ Examine the estimate of parameters of the model with best fit, and provide a bri
 
 ```{r}
 # include your code and output in the document
+precis(m2_set0, depth = 1, prob = 0.95)
 ```
 
 
