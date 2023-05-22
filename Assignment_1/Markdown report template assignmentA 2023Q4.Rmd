@@ -266,7 +266,7 @@ m0_bayes <- map2stan(
 m1_bayes <- map2stan(
   alist(
     sentiment ~ dnorm(mu, sigma),
-    mu <- a + b*individual,
+    mu <- a + b[individual],
     a ~ dnorm(0, 10),
     b[individual] ~ dnorm(0, 10),
     sigma ~ dexp(1)
@@ -277,7 +277,7 @@ m1_bayes <- map2stan(
   
 ```{r}
 precis(m0_bayes)
-precis(m1_bayes, depth = 2)
+precis(m1_bayes)
 compare(m0_bayes, m1_bayes)
 ```
 
@@ -285,34 +285,34 @@ compare(m0_bayes, m1_bayes)
 Redo the analysis on the actual tweet data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
 
 ```{r , warning=FALSE, message=FALSE, results='hide'}
-# # include your analysis code and output in the document
-# semFrame$Candidate <- as.factor(semFrame$Candidate)
-# # revert to the original data frame
-# library(rethinking)
-# m0_bayes_real <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a,
-#     a ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = semFrame, iter = 10000, chains = 4, cores = 4
-# )
-# m1_bayes_real <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a + b * Candidate,
-#     a ~ dnorm(0, 10),
-#     b ~ dnorm(0, 10),
-#     sigma ~ dexp(1)
-#   ),
-#   data = semFrame, iter = 10000, chains = 4, cores = 4
-# )
+# include your analysis code and output in the document
+semFrame$Candidates <- as.factor(semFrame$Candidate)
+# revert to the original data frame
+library(rethinking)
+m0_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a,
+    a ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
+m1_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a + b[Candidates],
+    a ~ dnorm(0, 10),
+    b[Candidates] ~ dnorm(0, 10),
+    sigma ~ dexp(1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
 ```
   
 ```{r}
-# precis(m0_bayes_real)
-# precis(m1_bayes_real)
+precis(m0_bayes_real)
+precis(m1_bayes_real)
 ```
 
 #### Comparison individual/organisation pair
@@ -569,11 +569,18 @@ m_actual <- map2stan(
 ```{r}
 precis(m_actual, depth = 1, prob = 0.95)
 
-compare(m_synthetic, m_actual)
 ```
 
 
 # Part 3 - Multilevel model
+
+## Loading the data
+Our combined student numbers are: 5059151+5096790+4658272 = 14824213 % 3 = 0. Therefore we will use the file set0.csv
+
+```{r}
+# load set0.csv
+set0 <- read.csv("set0.csv")
+```
 
 ## Visual inspection
 Use graphics to inspect the distribution of the score, and relationship between session and score. Give a short description of the figure.
@@ -581,6 +588,29 @@ Use graphics to inspect the distribution of the score, and relationship between 
 
 ```{r}
 # include your code and output in the document
+
+# # plot the distribution of the score
+# hist(set0$score)
+
+# # plot the relationship between session and score
+# plot(set0$session, set0$score)
+
+library(ggplot2)
+ggplot(set0, aes(x = score)) + 
+  geom_histogram(binwidth = 1, color = "black", fill = "lightblue") +
+  theme_minimal() +
+  labs(title = "Distribution of Scores",
+       x = "Score", 
+       y = "Frequency")
+
+ggplot(set0, aes(x = session, y = score)) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  theme_minimal() +
+  labs(title = "Relationship between Session and Score",
+       x = "Session", 
+       y = "Score")
+
 ```
 
 ## Frequentist approach
@@ -594,6 +624,11 @@ Conduct multilevel analysis and calculate 95% confidence intervals thereby assum
 
 ```{r}
 # include your code and output in the document
+library(nlme)
+m1 <- lme(score ~ session, random = ~ 1 | subject, data = set0)
+summary(m1)
+conf_int <- intervals(m1, level = 0.95)
+conf_int
 ```
 
 ### Report section for a scientific publication
