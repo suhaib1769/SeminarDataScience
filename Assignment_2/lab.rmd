@@ -17,5 +17,27 @@ knitr::opts_chunk$set(echo = TRUE)
 \tableofcontents
 
 # Part 1 - Design and set-up of true experiment 
+```{r load data}
+d <- read.csv("data.csv")
+str(d)
+table(d$model, d$TeD)
+```
 
-## The motivation for the planned research 
+## Research question 1
+```{r rq one}
+linear_model_on_models <- lm(score~model, d)
+summary(linear_model_on_models)
+
+# plot the average score for each model
+library(ggplot2)
+ggplot(d, aes(x=model, y=score)) + geom_boxplot() + geom_jitter(width=0.2)
+linear_model_on_trainS_and_models <- lm(score~TeD+model, d)
+summary(linear_model_on_trainS_and_models)
+
+AIC(linear_model_on_models, linear_model_on_trainS_and_models)
+```
+### Data visualisation
+
+## Research question 2
+
+### Data visualisation
