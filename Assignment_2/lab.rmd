@@ -1,0 +1,21 @@
+---
+title: "Coursework assignment A - 2022-2023"
+subtitle: "CS4125 Seminar Research Methodology for Data Science"
+author: "Student names"
+date: "16/04/2023"
+output:
+   pdf_document:
+      fig_caption: true
+      number_sections: true 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+\tableofcontents
+
+# Part 1 - Design and set-up of true experiment 
+
+## The motivation for the planned research 
