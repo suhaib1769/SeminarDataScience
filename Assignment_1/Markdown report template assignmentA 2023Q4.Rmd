@@ -686,6 +686,10 @@ ggplot(set0, aes(x = session, y = score)) +
 
 ```
 
+The visual presents a bell-shaped curve, characteristic of a normal distribution. The scores range from 3 to 34, with a central tendency represented by the median value of 19. The distribution is symmetrically centered around the median, indicating a balanced dataset.
+
+The relationship between session and scores shows a linear function between the session number and the score. The higher the session number, the higher the score.
+
 ## Frequentist approach
 
 ### Multilevel analysis
@@ -704,8 +708,13 @@ conf_int <- intervals(m1, level = 0.95)
 conf_int
 ```
 
+
 ### Report section for a scientific publication
-Write a small section for a scientific publication, in which you report the results of the analyses, and explain the conclusions that can be drawn.
+A linear mixed-effects model analysis was conducted to examine the relationship between the predictor variable, session, and the response variable, score.
+
+The session predictor variable showed significant effects on the response variable with an estimated value of 1.00562 (SE = 0.0157501, t = 63.84847, p < 0.001). These results indicated that the session variable had a significant impact on the scores.
+
+Furthermore, the random effects component indicated that the intercepts for subjects exhibited a standard deviation of 4.836719, suggesting variations in the baseline values of the response variable among individuals. This suggests that individuals had distinct starting points for their scores, independent of the session variable.
 
 A linear mixed-effects model analysis was conducted to examine the relationship between the predictor variable, session, and the response variable, score.
 
