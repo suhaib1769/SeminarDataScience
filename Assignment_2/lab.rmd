@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Part 1 - Design and set-up of true experiment 
 ```{r load data}
-d <- read.csv("data.csv")
+d <- read.csv("Assignment_2/data.csv")
 str(d)
 table(d$model, d$TeD)
 ```
@@ -60,7 +60,73 @@ for (i in seq_along(model_names)) {
 }
 
 ```
+```{r rq one - data transformation}
+# By model
+ggplot(d, aes(model, score)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of score by model", x = "Model", y = "Score")
+```
+```{r rq one - data transformation}
+# By TeD
+ggplot(d, aes(TeD, score)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of score by TeD", x = "Test Dataset", y = "Score")
+
+```
+
+```{r rq one - data transformation}
+library(reshape2)  # For melting the data
+library(pheatmap)  # For creating the heatmap
+
+# Select only TrD columns and melt the data
+melted_d <- melt(d[,2:9])
+
+# Create a matrix for the heatmap
+heatmap_matrix <- table(melted_d$variable, melted_d$value)
+
+# Generate the heatmap
+pheatmap(heatmap_matrix, main = "Heatmap of Training Datasets")
+
+```
+
+```{r rq one - data transformation}
+ggplot(d, aes(score)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of score", x = "Score", y = "Frequency")
+```
+
+```{r rq one - data transformation} 
+# Q-Q plot
+ggplot(d, aes(sample = score)) +
+  stat_qq() +
+  stat_qq_line() +
+  labs(title = "Q-Q plot of score")
+
+# Skewness and kurtosis
+library(moments)
+paste("Skewness: ", skewness(d$score))
+paste("Kurtosis: ", kurtosis(d$score))
+```
 ### Data visualisation
+```{r rq one - data transformation}
+library(dplyr)
+library(moments)
+
+d %>% 
+  group_by(model) %>% 
+  summarise(skewness = skewness(score))
+
+```
+
+```{r rq one - data transformation}
+library(ggplot2)
+
+ggplot(d, aes(x = score)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  facet_wrap(~model) +
+  labs(title = "Histogram of score by model", x = "Score", y = "Frequency")
+```
+
 
 ## Research question 2
 
