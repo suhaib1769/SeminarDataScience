@@ -23,8 +23,7 @@ str(d)
 table(d$model, d$TeD)
 table(d$model, d$TrD1)
 table(d$model, d$TrD2)
-table(d$model, d$TrD3)
-
+aggregate(score~model, data = d, mean)
 ```
 
 ## Research question 1
