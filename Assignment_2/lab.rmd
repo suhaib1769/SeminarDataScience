@@ -7,6 +7,7 @@ output:
    pdf_document:
       fig_caption: true
       number_sections: true 
+      keep_tex: true
 ---
 
 ```{r setup, include=FALSE}
@@ -62,8 +63,8 @@ for (i in seq_along(model_names)) {
 The experiment focused on two different sets of models: Baselines which were not trained with any training data and Transfer learning models which were trained on varying amounts of training data sets. The first research question asks “Does transfer learning improve over typical non-transfer learning?”. The boxplot below shows the distribution of the data specifically distinguishing the distributions for each model. Based this plot, there is a vast sampling imbalance between the baseline models and the transfer learning models. 
 
 #### Visual: Box-plot
-```{r boxplot, echo=FALSE}
-ggplot(d, aes(x=model, y=score)) + geom_boxplot() + geom_jitter(width=0.2)
+```{r boxplot, echo=FALSE, fig.width=4, fig.height=4}
+ggplot(d, aes(x=model, y=score)) + geom_boxplot() + geom_jitter(width=0.1)
 
 # Plot fitted values of the model with the residuals
 plot(linear_model_on_models, which=1)
@@ -87,11 +88,6 @@ t.test(d_B$score,d_M$score)
 An independent sample t-test was conducted to compare the performance scores between the baseline models (B1, B2, and B3) and the transfer sharing models (M1, M2, M3, MF, MN, and MS). Our results suggest that there is a statistically significant difference in the scores between these two groups t(20.307) = -2.2606, p = 0.03491. The mean performance score of the baseline models (M = 0.378) was found to be lower than the mean performance score of the transfer sharing models  (M = 0.496). The 95 percent confidence interval for the difference in means ranged from  -0.227 to -0.009 further indicating a significant difference between the two groups. This analysis does provide some indication that transfer sharing models perform significantly better than baseline models in our dataset. 
 
 #### Average scores per model and Linear regression
-```{r average scores, echo=FALSE}
-linear_model_on_models <- lm(score~model, d)
-summary(linear_model_on_models)
-anova(linear_model_on_models)
-```
 To further investigate this difference, we also computed the mean performance scores for each model using the aggregate() function. Our analysis reveals variations in the average performance scores across different model types. Model MF displays the highest average performance score (0.531), while model B2 shows the lowest (0.328). This suggests that the choice of model may indeed have an impact on performance.
 
 However, this analysis provides only average scores and does not account for the spread of the data within each model type. Further analysis, such as conducting an ANOVA test, would provide a more comprehensive understanding of the differences between the models. Thus we fitted a model with the score as the dependent variable and model as the independent variable. The overall model was significant (F(8, 2987) = 8.261, p < 0.001, Adjusted R-squared = 0.01903), suggesting there is a statistically significant difference in performance scores based on the model used. However, it's worth noting that the Adjusted R-squared value was relatively low, indicating that only a small percentage of the variability in performance scores could be accounted for by the model type. This implies other factors not accounted for in this analysis could significantly influence the performance score.
