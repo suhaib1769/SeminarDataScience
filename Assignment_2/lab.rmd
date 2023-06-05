@@ -13,36 +13,33 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-\tableofcontents
-
-# Part 1 - Design and set-up of true experiment 
-```{r load data}
+```{r load data, include=FALSE}
 d <- read.csv("data.csv")
-str(d)
 table(d$model, d$TeD)
 table(d$model, d$TrD1)
 table(d$model, d$TrD2)
 aggregate(score~model, data = d, mean)
 ```
 
-## Research question 1
-```{r rq one}
+```{r rq one, include=FALSE}
+# t test between B1, B2, and B3 vs the rest
+d_B <- subset(d, model=="B1" | model=="B2" | model=="B3")
+d_M <- subset(d, model=="M1" | model=="M2" | model=="M3" | model=="MF" | model=="MN" | model=="MS")
+t.test(d_B$score, d_M$score)
+
 linear_model_on_models <- lm(score~model, d)
 summary(linear_model_on_models)
-
+anova(linear_model_on_models)
 # plot the average score for each model
 library(ggplot2)
 ggplot(d, aes(x=model, y=score)) + geom_boxplot() + geom_jitter(width=0.2)
-linear_model_on_trainS_and_models <- lm(score~TeD+model, d)
-summary(linear_model_on_trainS_and_models)
 
-AIC(linear_model_on_models, linear_model_on_trainS_and_models)
+# Plot fitted values of the model with the residuals
+plot(linear_model_on_models, which=1)
 
 linear_model_model_trainD = lm(score~model * (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8), d)
 
 library(emmeans)
-# as.data.frame(ref_grid(linear_model_model_trainD))
 emmeans(linear_model_model_trainD, ~model)
 
 # Reorder the levels of the model variable
@@ -58,12 +55,59 @@ for (i in seq_along(model_names)) {
    d_current_model <- d[d$model == current_model, c("TeD", "TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "score")]
    linear_model_current_model <- lm(score~TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8, d_current_model)
    print(paste0("For: ", current_model))
-   # print(summary(linear_model_current_model))
    print(anova(linear_model_current_model))
 }
 ```
-### Data visualisation
+### Data exploration
+The experiment focused on two different sets of models: Baselines which were not trained with any training data and Transfer learning models which were trained on varying amounts of training data sets. The first research question asks “Does transfer learning improve over typical non-transfer learning?”. The boxplot below shows the distribution of the data specifically distinguishing the distributions for each model. Based this plot, there is a vast sampling imbalance between the baseline models and the transfer learning models. 
 
-## Research question 2
+#### Visual: Box-plot
+```{r boxplot}
+ggplot(d, aes(x=model, y=score)) + geom_boxplot() + geom_jitter(width=0.2)
 
-### Data visualisation
+# Plot fitted values of the model with the residuals
+plot(linear_model_on_models, which=1)
+```
+
+#### Transformed data for homogeneity
+In the process of our analysis, we conducted a comprehensive investigation of our model's residuals and fitted values to evaluate the necessity of data transformation.
+
+To gain insights into the residuals' structure, we plotted the residuals against the fitted values. There were no apparent trends, outliers, or structures, and the residuals seemed to be symmetrically distributed around a mean of zero across all levels of the fitted values.
+The absence of noticeable patterns in the Residuals vs. Fitted plot indicates that the model fits the data adequately without a need for transformation. 
+
+
+### RQ1: Does transfer learning improve over typical non-transfer learning?
+#### T-test
+An independent sample t-test was conducted to compare the performance scores between the baseline models (B1, B2, and B3) and the transfer sharing models (M1, M2, M3, MF, MN, and MS). Our results suggest that there is a statistically significant difference in the scores between these two groups t(20.307) = -2.2606, p = 0.03491. The mean performance score of the baseline models (M = 0.378) was found to be lower than the mean performance score of the transfer sharing models  (M = 0.496). The 95 percent confidence interval for the difference in means ranged from  -0.227 to -0.009 further indicating a significant difference between the two groups. This analysis does provide some indication that transfer sharing models perform significantly better than baseline models in our dataset. 
+
+#### Average scores per model and Linear regression
+To further investigate this difference, we also computed the mean performance scores for each model using the aggregate() function. Our analysis reveals variations in the average performance scores across different model types. Model MF displays the highest average performance score (0.531), while model B2 shows the lowest (0.328). This suggests that the choice of model may indeed have an impact on performance.
+
+However, this analysis provides only average scores and does not account for the spread of the data within each model type. Further analysis, such as conducting an ANOVA test, would provide a more comprehensive understanding of the differences between the models. Thus we fitted a model with the score as the dependent variable and model as the independent variable. The overall model was significant (F(8, 2987) = 8.261, p < 0.001, Adjusted R-squared = 0.01903), suggesting there is a statistically significant difference in performance scores based on the model used. However, it's worth noting that the Adjusted R-squared value was relatively low, indicating that only a small percentage of the variability in performance scores could be accounted for by the model type. This implies other factors not accounted for in this analysis could significantly influence the performance score.
+
+Estimate and standard error were calculated for each model, which are deviations from the intercept (B1 model) in terms of performance scores. However, none of these coefficients were found to be statistically significant (p > 0.05), suggesting no significant differences in performance scores between the B1 model and any other individual models when considered independently.
+
+In conclusion, the analysis shows that while model type explains a portion of the variance in performance scores, the effect size is small, and considerable variance is left unexplained by features left out of the linear model. While the transfer sharing models do outperform the baseline models, performance within the transfer sharing group is not uniform, and other factors not considered in this analysis may significantly influence these results. This is what we will be exploring with the next research question.
+
+### RQ2: How is model performance affected by the choice of training datasets?
+The transfer learning models were first trained on 8 different training data sets. They all contain the same instances but differ in the particularities of the task (eg. classification, ranking, etc) and ground truth. The distribution of training data sets over the models was imbalanced. The m1 model had for instance used training data set 1 33% times more than training data set 2. 
+
+Estimated marginal means (EMMs) were calculated for each model adjusted for the training sets used. These provide an estimate of the mean performance score for each model, adjusted for the training sets used by the models. The EMMs can not be calculated for the baseline models and MS since they don’t use any training data. The EMM differs slightly compared to the normal mean:
+  		model     	score 		emmean
+
+1    		B1 		0.453 		nonEst
+2    		B2 		0.3286	 	nonEst
+3    		B3 		0.353 		nonEst
+4    		M1 		0.509  		0.505
+5    		M2 		0.515  		0.513
+6    		M3 		0.520  		0.515
+7    		MF 		0.531   	0.520
+8    		MN 		0.455  		0.447
+9   		MS 		0.429 		nonEst
+
+
+To find out if the differences are significant, a linear model was fitted on the scoring outcomes of the models, taking the training sets as independent variables. This was done on all the different transfer learning models. In most cases, there was no significant differences found but for the MS model the analysis found a significant effect  (F(1, 1) = 4.8530, p = 0.02829) for training set one and for the MS model the analysis found a significant effect (F(1, 1) = 8.7536, p = 0.003223) for training set one. 
+
+Overall the effect of the training sets used is very small as the multiple R-squared value for the linear regression model was found to be 0.03657 (adjusted R-squared: 0.01943). This indicates that the combination of the independent variables, model type and TrD1-TrD8 variables, explains approximately 3.657% of the variance observed in the dependent variable, score.
+
+Thereful it can be concluded that the training sets used for the models only has an insignificant impact on model performance. The relatively low R-squared value and the absence of significant effects in most models suggest that the choice of training sets does not considerably affect the scores. It's noteworthy, however, that specific models like MS have shown significant relationships with certain training datasets, indicating that for some models, their performance could be sensitive to the choice of training datasets.
