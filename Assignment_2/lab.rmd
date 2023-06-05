@@ -1,7 +1,7 @@
 ---
-title: "Coursework assignment A - 2022-2023"
+title: "Coursework assignment B - 2022-2023"
 subtitle: "CS4125 Seminar Research Methodology for Data Science"
-author: "Student names"
+author: "Otte, Colin, Suhaib"
 date: "16/04/2023"
 output:
    pdf_document:
@@ -25,7 +25,7 @@ aggregate(score~model, data = d, mean)
 # t test between B1, B2, and B3 vs the rest
 d_B <- subset(d, model=="B1" | model=="B2" | model=="B3")
 d_M <- subset(d, model=="M1" | model=="M2" | model=="M3" | model=="MF" | model=="MN" | model=="MS")
-t.test(d_B$score, d_M$score)
+t.test(d_B$score,d_M$score)
 
 linear_model_on_models <- lm(score~model, d)
 summary(linear_model_on_models)
@@ -62,7 +62,7 @@ for (i in seq_along(model_names)) {
 The experiment focused on two different sets of models: Baselines which were not trained with any training data and Transfer learning models which were trained on varying amounts of training data sets. The first research question asks “Does transfer learning improve over typical non-transfer learning?”. The boxplot below shows the distribution of the data specifically distinguishing the distributions for each model. Based this plot, there is a vast sampling imbalance between the baseline models and the transfer learning models. 
 
 #### Visual: Box-plot
-```{r boxplot}
+```{r boxplot, echo=FALSE}
 ggplot(d, aes(x=model, y=score)) + geom_boxplot() + geom_jitter(width=0.2)
 
 # Plot fitted values of the model with the residuals
@@ -78,9 +78,20 @@ The absence of noticeable patterns in the Residuals vs. Fitted plot indicates th
 
 ### RQ1: Does transfer learning improve over typical non-transfer learning?
 #### T-test
+```{r t-test, echo=FALSE}
+d <- read.csv("data.csv")
+d_B <- subset(d, model=="B1" | model=="B2" | model=="B3")
+d_M <- subset(d, model=="M1" | model=="M2" | model=="M3" | model=="MF" | model=="MN" | model=="MS")
+t.test(d_B$score,d_M$score)
+```
 An independent sample t-test was conducted to compare the performance scores between the baseline models (B1, B2, and B3) and the transfer sharing models (M1, M2, M3, MF, MN, and MS). Our results suggest that there is a statistically significant difference in the scores between these two groups t(20.307) = -2.2606, p = 0.03491. The mean performance score of the baseline models (M = 0.378) was found to be lower than the mean performance score of the transfer sharing models  (M = 0.496). The 95 percent confidence interval for the difference in means ranged from  -0.227 to -0.009 further indicating a significant difference between the two groups. This analysis does provide some indication that transfer sharing models perform significantly better than baseline models in our dataset. 
 
 #### Average scores per model and Linear regression
+```{r average scores, echo=FALSE}
+linear_model_on_models <- lm(score~model, d)
+summary(linear_model_on_models)
+anova(linear_model_on_models)
+```
 To further investigate this difference, we also computed the mean performance scores for each model using the aggregate() function. Our analysis reveals variations in the average performance scores across different model types. Model MF displays the highest average performance score (0.531), while model B2 shows the lowest (0.328). This suggests that the choice of model may indeed have an impact on performance.
 
 However, this analysis provides only average scores and does not account for the spread of the data within each model type. Further analysis, such as conducting an ANOVA test, would provide a more comprehensive understanding of the differences between the models. Thus we fitted a model with the score as the dependent variable and model as the independent variable. The overall model was significant (F(8, 2987) = 8.261, p < 0.001, Adjusted R-squared = 0.01903), suggesting there is a statistically significant difference in performance scores based on the model used. However, it's worth noting that the Adjusted R-squared value was relatively low, indicating that only a small percentage of the variability in performance scores could be accounted for by the model type. This implies other factors not accounted for in this analysis could significantly influence the performance score.
@@ -93,17 +104,15 @@ In conclusion, the analysis shows that while model type explains a portion of th
 The transfer learning models were first trained on 8 different training data sets. They all contain the same instances but differ in the particularities of the task (eg. classification, ranking, etc) and ground truth. The distribution of training data sets over the models was imbalanced. The m1 model had for instance used training data set 1 33% times more than training data set 2. 
 
 Estimated marginal means (EMMs) were calculated for each model adjusted for the training sets used. These provide an estimate of the mean performance score for each model, adjusted for the training sets used by the models. The EMMs can not be calculated for the baseline models and MS since they don’t use any training data. The EMM differs slightly compared to the normal mean:
-  		model     	score 		emmean
 
-1    		B1 		0.453 		nonEst
-2    		B2 		0.3286	 	nonEst
-3    		B3 		0.353 		nonEst
-4    		M1 		0.509  		0.505
-5    		M2 		0.515  		0.513
-6    		M3 		0.520  		0.515
-7    		MF 		0.531   	0.520
-8    		MN 		0.455  		0.447
-9   		MS 		0.429 		nonEst
+```{r, echo=FALSE}
+# Aggregate 
+aggregate(score~model, data = d, mean)
+# EMMs
+emm <- emmeans(linear_model_model_trainD, ~ model)
+emm
+```
+
 
 
 To find out if the differences are significant, a linear model was fitted on the scoring outcomes of the models, taking the training sets as independent variables. This was done on all the different transfer learning models. In most cases, there was no significant differences found but for the MS model the analysis found a significant effect  (F(1, 1) = 4.8530, p = 0.02829) for training set one and for the MS model the analysis found a significant effect (F(1, 1) = 8.7536, p = 0.003223) for training set one. 
