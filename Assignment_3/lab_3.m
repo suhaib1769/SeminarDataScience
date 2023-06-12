@@ -4,11 +4,12 @@ image=imread('lena_gray.png');
 x = double(reshape(image,w*h,d))/255;
 
 %Compute the covariance matrix and its eigenvalues and vectors
-C = x*x';
+n = size(x,1);
+C = cov(x);
 %Computation of all eigenvalues and eigenvectors
-%[V,D] = eig(C);
+[V,D] = eig(C);
 %Computation of the first 4 eigenvalues and eigenvectors
-[V,D] = eigs(C,4);
+% [V,D] = eigs(C, [], 4);
 
 %extract first eigenvector from matrix of eigenvectors
 em1=V(:,1);
