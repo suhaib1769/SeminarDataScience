@@ -1,6 +1,7 @@
-% get dataset 1
-data1 = readtable('AirQualityUCI.csv', VariableNamingRule='preserve');
-data1 = data1(:,3:end);
+% get dataset 
+data1 = readtable('google_review_ratings.csv', VariableNamingRule='preserve');
+data1(:,end) = [];
+data1(:,1) = [];
 data1_matrix = table2array(data1);
 disp(size(data1_matrix));
 
