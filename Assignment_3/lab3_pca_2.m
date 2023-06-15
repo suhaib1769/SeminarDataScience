@@ -90,6 +90,26 @@ disp(basis_vectors)
 elapsed_time = toc;
 disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
 
+% Step 6: Extract eigenvalues from matrix D
+eigenvalues = diag(D);
+
+% Step 7: Calculate proportion of variance explained
+variance_explained = eigenvalues / sum(eigenvalues);
+
+% Step 8: Compute cumulative proportion of variance explained
+cumulative_variance_explained = cumsum(variance_explained);
+
+% Step 9: Plot the scree plot
+figure
+plot(1:numel(eigenvalues), variance_explained, 'bo-')
+hold on
+plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
+xlabel('Principal Component')
+ylabel('Proportion of Variance Explained')
+title('Scree Plot')
+legend('Variance Explained', 'Cumulative Variance Explained')
+grid on
+
 %% Comparison of PCA with MATLAB's built-in pca function 
 tic
 [coeff,score,latent,~,explained] = pca(data1_matrix);
