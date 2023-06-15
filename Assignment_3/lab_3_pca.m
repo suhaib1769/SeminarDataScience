@@ -1,22 +1,126 @@
-%Load image and convert it to a vector
-image=imread('lena_gray.png');
-[h w d]=size(image);
-x = double(reshape(image,w*h,d))/255;
+% get dataset 1
+data1 = readtable('AirQualityUCI.csv', VariableNamingRule='preserve');
+data1 = data1(:,3:end);
+data1_matrix = table2array(data1);
+disp(size(data1_matrix));
 
-%Compute the covariance matrix and its eigenvalues and vectors
-n = size(x,1);
-C = cov(x);
-%Computation of all eigenvalues and eigenvectors
-[V,D] = eig(C);
-%Computation of the first 4 eigenvalues and eigenvectors
-% [V,D] = eigs(C, [], 4);
+%% PCA with Coviariance matrix
+tic;
+% Step 1: Compute the center of the points (mean)
+mu = mean(data1_matrix);
 
-%extract first eigenvector from matrix of eigenvectors
-em1=V(:,1);
-%project image onto eigenspace
-p1x=x'*em1*em1;
+% Step 2: Compute the centered points (subtract mean)
+data_centered = data1_matrix - mu;
 
-%convert eigenvector to image and display the image
-image =uint8(reshape(p1x,h,w,d)*255);
-figure, imshow(image)
+% Step 3: Compute the covariance matrix
+[n, m] = size(data_centered); % n = number of observations, m = number of variables
+normalization_factor = n - 1; % For unbiased estimate
+C = (data_centered' * data_centered) ./ normalization_factor;
 
+% Step 4: Compute eigenvalues and eigenvectors of the covariance matrix
+[V, D] = eig(C);
+
+% Sort the eigenvalues in descending order and get the indices
+[eigValues, order] = sort(diag(D), 'descend');
+
+% Sort the eigenvectors based on the order of eigenvalues
+eigVectors = V(:, order);
+
+% Project the original data onto the PCA space
+data_pca = data_centered * eigVectors;
+
+% Display the eigenvalues and eigenvectors
+disp('Eigenvalues:')
+disp(diag(D))
+disp('Eigenvectors:')
+disp(V);
+
+% Step 5: Extract eigenvalues from matrix D
+eigenvalues = diag(D);
+
+% Step 6: Calculate proportion of variance explained
+variance_explained = eigenvalues / sum(eigenvalues);
+
+% Step 7: Compute cumulative proportion of variance explained
+cumulative_variance_explained = cumsum(variance_explained);
+
+elapsed_time = toc;
+disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
+
+% Step 8: Plot the scree plot
+figure
+plot(1:numel(eigenvalues), variance_explained, 'bo-')
+hold on
+plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
+xlabel('Principal Component')
+ylabel('Proportion of Variance Explained')
+title('Scree Plot - PCA with covariance matrix')
+legend('Variance Explained', 'Cumulative Variance Explained')
+grid on
+
+%% PCA with Gram matrix
+tic;
+% Step 1: Compute the center of the points
+mu2 = mean(data1_matrix);
+
+% Step 2: Compute the centered points
+data_centered2 = data1_matrix - mu2;
+
+% Step 3: Compute the Gram matrix
+G = data_centered2' * data_centered2;
+
+% Step 4: Compute eigenvalues and eigenvectors of the Gram matrix
+[V2, D2] = eig(G);
+
+% Sort the eigenvalues in descending order and get the indices
+[eigValues2, order] = sort(diag(D2), 'descend');
+
+% Sort the eigenvectors based on the order of eigenvalues
+eigVectors2 = V2(:, order);
+
+% Step 5: Compute the basis vectors of the affine spaces
+basis_vectors = eigVectors2 * data_centered2';
+basis_vectors = basis_vectors ./ vecnorm(basis_vectors);
+
+% Display the basis vectors
+disp('Basis vectors:')
+disp(basis_vectors)
+
+elapsed_time = toc;
+disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
+
+% Step 6: Extract eigenvalues from matrix D
+eigenvalues = diag(D);
+
+% Step 7: Calculate proportion of variance explained
+variance_explained = eigenvalues / sum(eigenvalues);
+
+% Step 8: Compute cumulative proportion of variance explained
+cumulative_variance_explained = cumsum(variance_explained);
+
+% Step 9: Plot the scree plot
+figure
+plot(1:numel(eigenvalues), variance_explained, 'bo-')
+hold on
+plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
+xlabel('Principal Component')
+ylabel('Proportion of Variance Explained')
+title('Scree Plot - PCA with Gram matrix')
+legend('Variance Explained', 'Cumulative Variance Explained')
+grid on
+
+%% Comparison of PCA with MATLAB's built-in pca function 
+tic
+[coeff,score,latent,~,explained] = pca(data1_matrix);
+
+% Display the eigenvalues and eigenvectors
+disp('Eigenvalues:')
+disp(latent)
+disp('Eigenvectors:')
+disp(coeff);
+
+elapsed_time = toc;
+disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
+
+%% Get storage data
+whos;
