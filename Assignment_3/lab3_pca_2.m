@@ -15,7 +15,8 @@ data_centered = data1_matrix - mu;
 
 % Step 3: Compute the covariance matrix
 n = size(data_centered, 1);
-C = (data_centered' * data_centered) / (n - 1);
+% C = (data_centered' * data_centered) / (n - 1);
+C = cov(data_centered);
 
 % Step 4: Compute eigenvalues and eigenvectors of the covariance matrix
 [V, D] = eig(C);
@@ -44,19 +45,19 @@ variance_explained = eigenvalues / sum(eigenvalues);
 % Step 7: Compute cumulative proportion of variance explained
 cumulative_variance_explained = cumsum(variance_explained);
 
-% % Step 8: Plot the scree plot
-% figure
-% plot(1:numel(eigenvalues), variance_explained, 'bo-')
-% hold on
-% plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
-% xlabel('Principal Component')
-% ylabel('Proportion of Variance Explained')
-% title('Scree Plot')
-% legend('Variance Explained', 'Cumulative Variance Explained')
-% grid on
-
 elapsed_time = toc;
 disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
+
+% Step 8: Plot the scree plot
+figure
+plot(1:numel(eigenvalues), variance_explained, 'bo-')
+hold on
+plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
+xlabel('Principal Component')
+ylabel('Proportion of Variance Explained')
+title('Scree Plot')
+legend('Variance Explained', 'Cumulative Variance Explained')
+grid on
 
 %% PCA with Gram matrix
 tic;
@@ -67,7 +68,7 @@ mu2 = mean(data1_matrix);
 data_centered2 = data1_matrix - mu2;
 
 % Step 3: Compute the Gram matrix
-G = data_centered2 * data_centered2';
+G = data_centered2' * data_centered2;
 
 % Step 4: Compute eigenvalues and eigenvectors of the Gram matrix
 [V2, D2] = eig(G);
@@ -79,12 +80,12 @@ G = data_centered2 * data_centered2';
 eigVectors2 = V2(:, order);
 
 % Step 5: Compute the basis vectors of the affine spaces
-basis_vectors = data_centered2' * eigVectors2;
+basis_vectors = eigVectors2 * data_centered2';
 basis_vectors = basis_vectors ./ vecnorm(basis_vectors);
 
 % Display the basis vectors
 disp('Basis vectors:')
-% disp(basis_vectors)
+disp(basis_vectors)
 
 elapsed_time = toc;
 disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
