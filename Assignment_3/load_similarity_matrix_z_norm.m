@@ -7,7 +7,13 @@ countries = data(:, 1);
 % Remove the 'Country' column from the data matrix
 data(:, 1) = [];
 data(:, 1) = [];
-data = normalize(str2double(data));
+data = str2double(data);
+% Find the minimum and maximum values along each column
+min_vals = min(data);
+max_vals = max(data);
+
+% Scale the matrix to the range [0, 1]
+data = (data - min_vals) ./ (max_vals - min_vals);
 num_countries = size(data, 1);
 similarity_matrix = zeros(num_countries, num_countries);
 

@@ -1,13 +1,12 @@
-% Load the CSV file
-data = readmatrix('cleaned_countries.csv', 'OutputType', 'string');
+% Read the tab-delimited text file
+data = readmatrix("imports-85.csv", 'OutputType', 'string');
 
-% Store the 'Country' column separately
-countries = data(:, 1);
+countries = data(:, 2);
+% Remove the third column
+data(:, 2) = [];
+data = str2double(data);
+data = normalize(data);
 
-% Remove the 'Country' column from the data matrix
-data(:, 1) = [];
-data(:, 1) = [];
-data = normalize(str2double(data));
 num_countries = size(data, 1);
 similarity_matrix = zeros(num_countries, num_countries);
 
