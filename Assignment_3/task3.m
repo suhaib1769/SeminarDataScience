@@ -1,3 +1,22 @@
+normalisation_method = 'regular';
+dataset = 'countries';
+
+if strcmpi(normalisation_method, 'regular') && strcmpi(dataset, 'countries')
+    run("load_similarity_matrix.m")
+end
+
+if strcmpi(normalisation_method, 'regular') && strcmpi(dataset, 'cars')
+    run("load_cars_similarity_matrix.m")
+end
+
+if strcmpi(normalisation_method, 'min_max') && strcmpi(dataset, 'countries')
+    run("load_similarity_matrix_min_max_norm.m")
+end
+
+if strcmpi(normalisation_method, 'min_max') && strcmpi(dataset, 'cars')
+    run("load_cars_min_max_norm.m")
+end
+
 D = similarity_matrix;
 % Given pairwise distance matrix D
 n = size(D, 1);  % number of rows/data points

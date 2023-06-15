@@ -1,5 +1,4 @@
-run("load_anage_similarity_matrix.m")
-run("create_G.m")
+run("task3.m")
 % Compute t-SNE embeddings
 embeddings = tsne(data);
 
