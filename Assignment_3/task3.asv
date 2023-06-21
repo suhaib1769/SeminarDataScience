@@ -1,4 +1,4 @@
-normalisation_method = 'min_max';
+normalisation_method = 'regular';
 dataset = 'countries';
 
 if strcmpi(normalisation_method, 'regular') && strcmpi(dataset, 'countries')
@@ -27,14 +27,13 @@ e = ones(n, 1);
 % Identity matrix
 I_n = eye(n);
 % Compute the Gram matrix
-G = -0.5 * (I_n - 1/n * (e * e')) * D * (I_n - 1/n * (e * e'));
-G_og = G;
+G = -0.5 * (I_n - (1/n * (e * e'))) * D * (I_n - (1/n * (e * e')));
 G = 0.5 * (G + G');
 % Compute eigenvalues and eigenvectors of G
 [V, D2] = eig(G);
 
 % Extract eigenvalues from diagonal matrix D
-eigenvalues = flip(diag(D2));
+eigenvalues = diag(D2);
 eigenvalues(eigenvalues < 0) = 0;
 
 
@@ -69,12 +68,12 @@ for i = 1:num_countries
     for j = 1:num_countries
         row1 = correct_implementation(i, :);
         row2 = correct_implementation(j, :);
-        similarity_matrix_3(i, j) = sqrt(sum((row1 - row2).^2));
+        similarity_matrix3(i, j) = sqrt(sum((row1 - row2).^2));
         %similarity_matrix2(i, j) = 1 - dot(row1, row2) / (norm(row1) * norm(row2));
     end
 end
-disp('correct implementation')
-stress = sum((similarity_matrix - similarity_matrix_3).^2, 'all') / 2;
+
+stress = sum((similarity_matrix - similarity_matrix_#).^2, 'all') / 2;
 disp(stress)
 
 % Combine country names with coordinates matrix
