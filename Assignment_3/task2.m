@@ -4,7 +4,7 @@ data = data(:,3:end);
 data_matrix = table2array(data);
 
 %% Snapshot PCA: Random selection of datapoints
-fraction = 0.5;
+fraction = 0.05;
 tic;
 
 % Randomize data points
@@ -14,91 +14,152 @@ indices = randperm(n, num_samples);
 
 % Keep only selected data points
 data_matrix_snapshot = data_matrix(indices, :);
+% data_matrix_snapshot = data_matrix;
 
 % Compute PCA
 mu2 = mean(data_matrix_snapshot);
 data_centered2 = data_matrix_snapshot - mu2;
-G = data_centered2' * data_centered2;
-[V, D] = eig(G);
-[eigValues, order] = sort(diag(D), 'descend');
-eigVectors = V(:, order);
-basis_vectors = eigVectors* data_centered2';
+% Step 3: Compute the Gram matrix
+G = data_centered2 * data_centered2';
+% G = 1/m*G;
+
+% Step 4: Compute eigenvalues and eigenvectors of the Gram matrix
+[V2, D2] = eig(G);
+
+% disp('Gram')
+% disp('Eigenvalues:')
+% disp(diag(D2))
+% disp('Eigenvectors:')
+% disp(V2);
+
+elapsed_time = toc;
+disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
+[d2,ind2] = sort(diag(D2),'descend'); % sort eigenvalues in descending order
+V2 = V2(:,ind2); % reorder columns of V2 (eigenvectors) accordingly
+% Extract eigenvalues from matrix D
+eigenvalues = diag(V2);
+
+% Calculate proportion of variance explained
+variance_explained = eigenvalues / sum(eigenvalues);
+
+% Compute cumulative proportion of variance explained
+cumulative_variance_explained = cumsum(variance_explained);
+
+% Step 5: Compute the basis vectors of the affine spaces
+basis_vectors = V2 * data_centered2;
 basis_vectors = basis_vectors ./ vecnorm(basis_vectors);
-data_pca_snapshot = data_centered2 * basis_vectors;
 
-% Compute metrics for Snapshot PCA
+i = 13; 
+V2_i = basis_vectors(:, 1:i); % take the first i basis vectors
+
+% Project the centered data onto the new space
+data_projected2 = data_centered2 * V2_i'; % transpose data_centered2 to match dimensions
+
 elapsed_time_snapshot = toc;
-reconstructed_data = data_pca_snapshot * basis_vectors';
-reconstruction_error_snapshot = norm(data_centered2 - reconstructed_data, 'fro') / norm(data_centered2, 'fro');
-total_variance_snapshot = sum(var(data_centered2));
-explained_variance_snapshot = sum(eigValues(1:2)) / total_variance_snapshot;
-
-%% Nyström method
-fraction = 0.5;
-tic;
-
-% Randomize data points
-n = size(data_matrix, 2);
-num_landmarks = round(n * fraction);
-indices = randperm(n, num_landmarks);
-
-% Keep only selected data points
-data_subset = data_centered2(:, indices);
-normalization_factor = num_landmarks - 1;
-C = (data_subset' * data_subset) ./ normalization_factor;
-[V2, D2] = eig(C);
-[eigValues_landmarks, order] = sort(diag(D2), 'descend');
-eigVectors_landmarks = V2(:, order);
-data_pca_landmarks = data_centered2(:, indices) * eigVectors_landmarks;
-
-% Compute metrics for Nyström method
-elapsed_time_nystrom = toc;
-reconstructed_data_landmarks = data_pca_landmarks;
-reconstruction_error_landmarks = norm(data_centered2(:, indices) - reconstructed_data_landmarks, 'fro') / norm(data_centered2(:, indices), 'fro');
-total_variance_landmarks = sum(var(data_centered2(:, indices)));
-explained_variance_landmarks = sum(eigValues_landmarks(1:2)) / total_variance_landmarks;
-
 %% MATLAB built-in PCA
 tic;
-[coeff, score, latent] = pca(data_matrix);
-elapsed_time_matlab = toc;
+[coeff, score, ~, tsquared, explained] = pca(data_matrix);
+time_matlab = toc;
 
-%% Comparison
-disp('====== Time Comparison ======');
-disp(['Time taken by MATLAB PCA: ', num2str(elapsed_time_matlab)]);
-disp(['Time taken by Snapshot PCA: ', num2str(elapsed_time_snapshot)]);
-disp(['Time taken by Nyström method: ', num2str(elapsed_time_nystrom)]);
+%% Nystrom method
+% Define the data
+X = data_matrix;
+tic;
+mu = mean(data_matrix);
 
-% Memory of eigenvectors
-info_matlab_coeff = whos('coeff');
-info_snapshot_eigVectors = whos('eigVectors');
-info_nystrom_eigVectors_landmarks = whos('eigVectors_landmarks');
-disp(['Memory of eigenvectors (MATLAB PCA): ', num2str(info_matlab_coeff.bytes)]);
-disp(['Memory of eigenvectors (Snapshot PCA): ', num2str(info_snapshot_eigVectors.bytes)]);
-disp(['Memory of eigenvectors (Nyström method): ', num2str(info_nystrom_eigVectors_landmarks.bytes)]);
+% Center the data
+X_centered = bsxfun(@minus, X, mean(X, 1));
 
-% Memory of eigenvalues
-info_matlab_latent = whos('latent');
-info_snapshot_eigValues = whos('eigValues');
-info_nystrom_eigValues_landmarks = whos('eigValues_landmarks');
-disp(['Memory of eigenvalues (MATLAB PCA): ', num2str(info_matlab_latent.bytes)]);
-disp(['Memory of eigenvalues (Snapshot PCA): ', num2str(info_snapshot_eigValues.bytes)]);
-disp(['Memory of eigenvalues (Nyström method): ', num2str(info_nystrom_eigValues_landmarks.bytes)]);
+% Randomize data points
+fraction = 0.7;
+n = size(X_centered, 2);
+l = round(n * fraction);
+% indices = randperm(n, l);
+% indices = sort(indices);
 
-% Memory of covariance or Gram matrix
-info_snapshot_G = whos('G');
-info_nystrom_C = whos('C');
-disp(['Memory of Gram matrix (Snapshot PCA): ', num2str(info_snapshot_G.bytes)]);
-disp(['Memory of Covariance matrix (Nyström method): ', num2str(info_nystrom_C.bytes)]);
+% Keep only selected data points
+S = 1:l;
+
+% Compute the columns of the Covariance matrix
+[n, m] = size(X_centered);
+C1 = X_centered(:, S);
+C_hat = (1/(n-1))*(X_centered'*C1);
+
+% Partition the computed columns into a square l x l matrix A and a (n - l) x l matrix B
+A = C_hat(1:l, 1:l);
+B = C_hat(l+1:end, :);
+
+% Compute the eigenvalues and eigenvectors of A
+[U_A, Lambda_A] = eig(A);
+
+% Extract eigenvalues from matrix D
+eigenvalues = diag(Lambda_A);
 
 
-% Reconstruction Error and Explained Variance
-disp('====== Reconstruction Error Comparison ======');
-disp(['Reconstruction error (MATLAB PCA): ', 'Not computed in this script']); % Update if computed
-disp(['Reconstruction error (Snapshot PCA): ', num2str(reconstruction_error_snapshot)]);
-disp(['Reconstruction error (Nyström method): ', num2str(reconstruction_error_landmarks)]);
+% Ensure the eigenvalues and corresponding eigenvectors are ordered by descending eigenvalue
+[Lambda_A, sortIdx] = sort(diag(Lambda_A), 'descend');
+U_A = U_A(:, sortIdx);
 
-disp('====== Variance Explained Comparison ======');
-disp(['Variance explained (MATLAB PCA): ', 'Not computed in this script']); % Update if computed
-disp(['Variance explained (Snapshot PCA): ', num2str(explained_variance_snapshot)]);
-disp(['Variance explained (Nyström method): ', num2str(explained_variance_landmarks)]);
+dia_lambda = diag(Lambda_A);
+% Compute the approximate PCA modes
+U_hat = [U_A; B * U_A / dia_lambda];
+
+
+% Calculate proportion of variance explained
+variance_explained = eigenvalues / sum(eigenvalues);
+
+% Compute cumulative proportion of variance explained
+cumulative_variance_explained = cumsum(variance_explained);
+time_nystrom = toc;
+
+% Plot the scree plot
+figure
+plot(1:numel(eigenvalues), variance_explained, 'bo-')
+hold on
+plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
+xlabel('Principal Component')
+ylabel('Proportion of Variance Explained')
+title('Scree Plot - PCA with covariance matrix')
+legend('Variance Explained', 'Cumulative Variance Explained')
+grid on
+
+%% Compare results
+
+k = 4;
+% Compute and compare reconstruction errors
+reconstructed_matlab_k = score(:, 1:k) * coeff(:, 1:k)' + mu;
+% Project the data onto the PCA modes
+projected_X_k = X * U_hat(:, 1:k);
+% Reconstruct the data from the projected data
+reconstructed_nystrom_k = projected_X_k * U_hat(:, 1:k)';
+error_matlab = sum(sum((X - reconstructed_matlab_k).^2));
+error_nystrom = sum(sum((X - reconstructed_nystrom_k).^2));
+
+% Extract the diagonal elements, which are the eigenvalues
+lambda_values = diag(dia_lambda);
+
+% Compute the cumulative sum of the eigenvalues
+cumulative_lambda = cumsum(lambda_values);
+
+% Compute the total sum of the eigenvalues
+total_lambda = sum(lambda_values);
+
+% Compute the explained variance
+explained_nystrom = lambda_values / total_lambda * 100; % Convert to percentage
+
+% Compare computation times
+fprintf('Computation time (MATLAB PCA): %f seconds\n', time_matlab);
+fprintf('Computation time (Nystrom method): %f seconds\n', time_nystrom);
+% fprintf('Computation time (Snapshot PCA): %f seconds\n', elapsed_time_snapshot);
+
+% Compare reconstruction errors
+fprintf('Reconstruction error (MATLAB PCA): %f\n', error_matlab);
+fprintf('Reconstruction error (Nystrom method): %f\n', error_nystrom);
+% fprintf('Reconstruction error (Snapshot PCA): %f\n', reconstruction_error);
+
+% Compare explained variance for the first few components
+fprintf('Explained variance (MATLAB PCA): %s\n', num2str(explained(1:10)'));
+fprintf('Explained variance (Nystrom method): %s\n', num2str(explained_nystrom(1:l)'));
+% fprintf('Explained variance (Snapshot PCA): %s\n', num2str(explained_variance_snapshot(1:1)'));
+
+whos('G', 'data_matrix', 'score', 'coeff', 'X_centered', 'C1', 'C_hat', 'A', 'B', 'U_A', 'U_hat')
