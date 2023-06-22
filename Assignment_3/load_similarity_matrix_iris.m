@@ -1,9 +1,12 @@
-% Read the tab-delimited text file
-data = readmatrix("imports-85.csv", 'OutputType', 'string');
+% Load the CSV file
+data = readmatrix('iris\iris.csv', 'OutputType', 'string');
 
-countries = data(:, 2);
-% Remove the third column
-data(:, 2) = [];
+% Store the 'Country' column separately
+targets = data(:, size(data, 2));
+
+% Remove the 'Country' column from the data matrix
+data(:, size(data, 2)) = [];
+
 data = str2double(data);
 
 num_columns = size(data, 2);  % Get the number of columns
@@ -20,14 +23,8 @@ for i = 1:num_columns
     data(:, i) = normalized_column;
 end
 
-num_countries = size(data, 1);
-similarity_matrix = zeros(num_countries, num_countries);
+distances = pdist(data);
+% Reshape the vector into a square matrix
+similarity_matrix = squareform(distances);
 
-for i = 1:num_countries
-    for j = 1:num_countries
-        row1 = data(i, :);
-        row2 = data(j, :);
-        %similarity_matrix(i, j) = 1 - dot(row1, row2) / (norm(row1) * norm(row2));
-        similarity_matrix(i, j) = sum((row1 - row2).^2);
-    end
-end
+num_targets = size(data, 1);

@@ -1,22 +1,21 @@
 run("task3.m")
 % Compute t-SNE embeddings
-embeddings = tsne(data);
+coordinates = tsne(data);
 
-% Plot the embeddings on a 2D plot
-plot(embeddings(1:15:end, 1), embeddings(1:15:end, 2), 'o');
-xlabel('Dimension 1');
-ylabel('Dimension 2');
-title('2D Representation of Data Points');
+unique_targets = unique(targets);
+num_unique_targets = numel(unique_targets);
+color_map = lines(num_unique_targets);
 
-% Add country names as text annotations
-text(embeddings(1:15:end, 1), embeddings(1:15:end, 2), countries(1:15:end), 'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom');
+% Plot the points with colors
+for i = 1:numel(unique_targets)
+    country_indices = strcmp(targets, unique_targets{i});
+    scatter(coordinates(country_indices, 1), coordinates(country_indices, 2), [], color_map(i, :), 'filled');
+    hold on;
+end
 
-% Extract the desired submatrices
-embeddings_submatrix = embeddings(1:10, 1:2);
-coordinates_submatrix = coordinates(1:10, 1:2);
+hold off;
 
-% Concatenate submatrices horizontally
-combined_matrix = [embeddings_submatrix, coordinates_submatrix];
-
-% Display the combined matrix
-disp(combined_matrix);
+% Set colorbar to show the legend
+colormap(color_map);
+c = colorbar('Ticks', linspace(0, 1, num_unique_targets), 'TickLabels', unique_targets);
+c.Label.String = 'targets';
