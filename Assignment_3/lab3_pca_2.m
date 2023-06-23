@@ -16,8 +16,8 @@ data_centered = data1_matrix - mu;
 [n, m] = size(data_centered); % n = number of observations, m = number of variables
 % normalization_factor = n - 1; % For unbiased estimate
 % C = (data_centered' * data_centered) ./ normalization_factor;
-C = (1/m)*(data_centered*data_centered');
-% C = cov(data_centered);
+% C = (1/m)*(data_centered*data_centered');
+C = cov(data_centered);
 
 % Step 4: Compute eigenvalues and eigenvectors of the covariance matrix
 [V, D] = eig(C);
@@ -59,14 +59,14 @@ i = 5; % adjust this value to the desired number of dimensions
 V_i = V(:, 1:i); % take the first i eigenvectors
 
 % Project the centered data onto the new space
-data_projected = data_centered'*V_i ; % transpose data_centered to match dimensions
-
-figure
-scatter(data_projected(:, 1), data_projected(:, 2), 'b', 'filled')
-xlabel('Principal Component 1')
-ylabel('Principal Component 2')
-title('Projected Data Visualization')
-grid on
+data_projected = data_centered*V_i ; % transpose data_centered to match dimensions
+% 
+% figure
+% scatter(data_projected(:, 1), data_projected(:, 2), 'b', 'filled')
+% xlabel('Principal Component 1')
+% ylabel('Principal Component 2')
+% title('Projected Data Visualization')
+% grid on
 
 %% PCA with Gram matrix
 tic;
@@ -78,13 +78,15 @@ data_centered2 = data1_matrix - mu2;
 [n, m] = size(data_centered2); % n = number of observations, m = number of variables
 
 % Step 3: Compute the Gram matrix
-G = data_centered2' * data_centered2;
+display(size(data_centered2));
+G = data_centered2 * data_centered2';
+display(size(G));
 % Step 4: Compute eigenvalues and eigenvectors of the Gram matrix
 [V2, D2] = eig(G);
 
 % disp('Gram')
-disp('Eigenvalues:')
-disp(diag(D2))
+% disp('Eigenvalues:')
+% disp(diag(D2))
 % disp('Eigenvectors:')
 % disp(V2);
 
@@ -112,7 +114,7 @@ legend('Variance Explained', 'Cumulative Variance Explained')
 grid on
 
 % Step 5: Compute the basis vectors of the affine spaces
-basis_vectors = data_centered2* V2;
+basis_vectors = data_centered2' * V2;
 basis_vectors = basis_vectors ./ vecnorm(basis_vectors);
 
 
@@ -123,7 +125,7 @@ i = 5; % adjust this value to the desired number of dimensions
 V2_i = basis_vectors(:, 1:i); % take the first i basis vectors
 
 % Project the centered data onto the new space
-data_projected2 = V2_i' * data_centered2; % transpose data_centered2 to match dimensions
+data_projected2 = V2_i' * data_centered2'; % transpose data_centered2 to match dimensions
 
 
 %% Comparison of PCA with MATLAB's built-in pca function 
