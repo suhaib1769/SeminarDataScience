@@ -31,10 +31,10 @@ The main theory which encompasses this topic is within the field of educational 
 What are the differences in learning outcomes, intrinsic motivation, and perceived difficulty between students who have access to a conversational AI tool (e.g., Chat-GPT) and those who rely on traditional coding resources while completing a challenging coding assignment?
 
 ## The related conceptual model 
-Independent variable(s): Use of chatgpt for an assignment
-Dependent variable: Grade received for the assignment
-Mediating variable (at least 1): Motivation, Interest
-Moderating variable (at least 1): Experience level: Number of years in university (the student a 1st year bachelor or a final year masters student, or somewhere in between)
+Independent variable(s): Use of chatgpt for an assignment.
+Dependent variable: Grade received for the assignment.
+Mediating variable: Motivation, Interest.
+Moderating variable: Experience level: Number of years in university (the student a 1st year bachelor or a final year masters student, or somewhere in between)
 
 ## Experimental Design 
 ##### Experimental Design (the study should have a true experimental design to test a single hypothesis that, for simplicity, includes only independent variable(s) and dependent variable(s). In other words, mediating and moderating variables are not included in the experimental design ) 
@@ -56,7 +56,7 @@ We will recruit participants from students studying computer science at TU Delft
 ## Suggested statistical analyses
 ##### Describe the statistical test you suggest to care out on the collected data
 ##### Frequentist approach
-In the frequentist approach to statistical analysis for this study, you would utilize a t-test, a statistical test that compares the mean grades between two groups—those using ChatGPT and those not using it. This comparison takes into account the variability within each group. The main objective here is to test the null hypothesis, which states that there is no difference in average assignment grades between the two groups. If the p-value, calculated during the test, is found to be less than the predetermined level of significance (usually 0.05), the null hypothesis is rejected. This means that the difference in grades between the groups is statistically significant.
+In the frequentist approach to statistical analysis for this study, you would utilize a t-test, a statistical test that compares the mean grades between two groups—those using ChatGPT and those not using it. This comparison takes into account the variability within each group. The main objective here is to test the null hypothesis, which states that there is no difference in average assignment grades between the two groups. If there is an observed difference and the p-value, calculated during the test, is found to be less than the predetermined level of significance (usually 0.05), the null hypothesis is rejected. This means that the difference in grades between the groups is statistically significant. 
 
 ##### Bayesian approach
 On the other hand, the Bayesian approach provides a probabilistic perspective on the results. Unlike the frequentist approach that tests a hypothesis, Bayesian statistics incorporate prior beliefs about the population parameter—in this case, the difference in mean grades. The aim is to update these prior beliefs based on the data collected during the experiment. To achieve this, we first define a prior distribution for the difference in grades, based on existing knowledge or reasonable assumptions. The collected data is then used to calculate the likelihood of seeing the data under different potential values for the parameter of interest. These likelihoods are used to update the prior distribution, resulting in what's known as a posterior distribution. This posterior distribution then serves as the basis for further analysis and interpretations, providing both an estimate (mean of the distribution) and a measure of uncertainty (credible interval).
@@ -121,7 +121,7 @@ knitr::include_graphics("conceptualModel.png")
 ##### Describe the mathematical model fitted on the most extensive model. (hint, look at the mark down file of the lectures to see example on formulate mathematical models in markdown). Assume a Gaussian distribution for the tweet’s sentiments rating. Justify the priors.
 
 The mathematical model fitted on the most extensive model is a linear model. The model is formulated as follows:
-
+$$
 \begin{aligned}
 \text{sentiment} &\sim \text{Normal}(\mu, \sigma) \\
 \mu &= \alpha + \beta_{\text{individual}} \\
@@ -129,13 +129,14 @@ The mathematical model fitted on the most extensive model is a linear model. The
 \beta_{\text{individual}} &\sim \text{Normal}(1, 2) \\
 \sigma &\sim \text{Normal}(0, 1) \\
 \end{aligned}
+$$
 
 We chose these values based on the following assumptions:
 
 - The sentiment of the tweets is normally distributed
-- the prior for alpha is normal with a mean of 1 and a standard deviation of 1 as we do not have any prior knowledge about the mean of the sentiment of the tweets
-- the prior for \beta_{\text{individual}} is normal with a mean of 1 and a standard deviation of 2 as we do not have any prior knowledge about the mean of the sentiment of the tweets; \beta_{\text{individual}} is a categorical variable with 3 levels (Hillary Clinton, Donald Trump, Bernie Sanders)
-- the sigma is normal with a mean of 0 and a standard deviation of 1 as we do not have any prior knowledge about the standard deviation of the sentiment of the tweets
+- the prior for $\alpha$ is normal with a mean of 1 and a standard deviation of 1 as we do not have any prior knowledge about the mean of the sentiment of the tweets
+- the prior for $\beta_{\text{individual}}$ is normal with a mean of 1 and a standard deviation of 2 as we do not have any prior knowledge about the mean of the sentiment of the tweets; $\beta_{\text{individual}}$ is a categorical variable with 3 levels (Hillary Clinton, Donald Trump, Bernie Sanders)
+- the $\sigma$ is normal with a mean of 0 and a standard deviation of 1 as we do not have any prior knowledge about the standard deviation of the sentiment of the tweets
 
 ### Generate Synthetic data
 ##### Create a synthetic data set with a clear difference between tweets’ sentiments of celebrities for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data. (hint, look at class lecture slides of lecture on Generalized linear models for example to create synthetic data)
@@ -234,7 +235,7 @@ The difference in sentiment of the tweets is significant with Bonferroni correct
 #### Report section for a scientific publication
 ##### Write a small section for a scientific publication (journal or a conference), in which you report the results of the analyses, and explain the conclusions that can be drawn in a format commonly used by the scientific community Look at Brightspace for examples papers and guidelines on how to do this. (Hint, there are strict guidelines for reporting statistical results in paper, I expect you to follow these here) 
 
-The analysis of variance (ANOVA) was performed to compare the fit of two models: Model 1 and Model 2. Model 1 represents the null model, while Model 2 includes the additional predictor variable.
+The analysis of variance (ANOVA) was performed to compare the fit of two models: Model 1 and Model 2. Model 1 represents the null model, while Model 2 includes the additional predictor variable, candidate.
 
 The results of the ANOVA revealed a significant difference between the models, indicating that the inclusion of the predictor variable, the candidate that the tweet was about, significantly improved the fit of the model, F(2, 297) = 14.31, p < 0.05.
 
@@ -244,7 +245,7 @@ The F-value of 14.31 indicates the ratio of the variance explained by the Candid
 These findings collectively support the hypothesis that the Candidate variable is a significant factor in explaining the variation in the scores. The results suggest that Model 2, which includes the Candidate variable, provides a more accurate representation of the relationship between the Candidate and the scores compared to Model 1.
 
 We also conducted a post hoc analysis to examine pairwise comparisons between the scores of different candidates using the Bonferroni adjustment method. The analysis was performed using a pairwise t-test.
-The pairwise comparisons revealed significant differences in scores between certain candidates. Specifically, the scores of Hillary Clinton and Donald Trump were significantly different (p < 0.01), with Donald Trump exhibiting higher scores compared to Hillary Clinton. Additionally, the scores of Bernie Sanders and Hillary Clinton were also significantly different (p = 0.00011), with Bernie Sanders having higher scores compared to Hillary Clinton.
+The pairwise comparisons revealed significant differences in scores between certain candidates. Specifically, the scores of Hillary Clinton and Donald Trump were significantly different (p < 0.01), with Donald Trump exhibiting higher scores compared to Hillary Clinton. Additionally, the scores of Bernie Sanders and Hillary Clinton were also significantly different (p < 0.001), with Bernie Sanders having higher scores compared to Hillary Clinton.
 These findings suggest that there are significant variations in the sentiment expressed towards different candidates. Specifically, Donald Trump received higher sentiment scores compared to Hillary Clinton, while Bernie Sanders received higher sentiment scores compared to Hillary Clinton.
 The Bonferroni adjustment method was employed to address multiple comparisons, ensuring a stricter control of the overall type I error rate. This adjustment method accounts for the increased risk of false positives when conducting multiple comparisons.
 Overall, the post hoc analysis provides further insights into the sentiment differences between candidates and supports the notion that the sentiment expressed towards different candidates varies significantly.
@@ -257,35 +258,34 @@ For the Bayesian analyses, use the rethinking and/or BayesianFirstAid library
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
 
 ```{r , warning=FALSE, message=FALSE, results='hide'}
-# include your analysis code of synthetic data and output in the document
-# library(rethinking)
-# synthetic2 = synthetic
-# synthetic2$individual <- as.factor(synthetic2$individual)
-# m0_bayes <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a,
-#     a ~ dnorm(0, 1),
-#     sigma ~ dnorm(0, 1)
-#   ),
-#   data = synthetic2, iter = 10000, chains = 4, cores = 4
-# )
-# m1_bayes <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a + b[individual],
-#     a ~ dnorm(0, 1),
-#     b[individual] ~ dnorm(1, 2),
-#     sigma ~ dnorm(0, 1)
-#   ),
-#   data = synthetic2, iter = 10000, chains = 4, cores = 4
-# )
+library(rethinking)
+synthetic2 = synthetic
+synthetic2$individual <- as.factor(synthetic2$individual)
+m0_bayes <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a,
+    a ~ dnorm(0, 1),
+    sigma ~ dnorm(0, 1)
+  ),
+  data = synthetic2, iter = 10000, chains = 4, cores = 4
+)
+m1_bayes <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a + b[individual],
+    a ~ dnorm(0, 1),
+    b[individual] ~ dnorm(1, 2),
+    sigma ~ dnorm(0, 1)
+  ),
+  data = synthetic2, iter = 10000, chains = 4, cores = 4
+)
 ```
   
 ```{r}
-# levels(synthetic2$individual)
-# precis(m1_bayes, depth=2, prob=.95)[1:5,]
-# compare(m0_bayes, m1_bayes)
+levels(synthetic2$individual)
+precis(m1_bayes, depth=2, prob=.95)[1:5,]
+compare(m0_bayes, m1_bayes)
 ```
 From the results above, we can see that the coefficients of the linear model that we used to generate the synthetic data set are reproduced. 
 We have a intercept of -0.22 and when we adjust the values for the individuals we get 0.3 for Sanders, 1.2 for Trump, and -0.07 for Clinton.
@@ -297,34 +297,32 @@ Redo the analysis on the actual tweet data set. Provide a short interpretation o
 
 
 ```{r , warning=FALSE, message=FALSE, results='hide'}
-# include your analysis code and output in the document
-# revert to the original data frame
-# library(rethinking)
-# m0_bayes_real <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a,
-#     a ~ dnorm(0, 1),
-#     sigma ~ dnorm(0, 1)
-#   ),
-#   data = semFrame, iter = 10000, chains = 4, cores = 4
-# )
-# m1_bayes_real <- map2stan(
-#   alist(
-#     sentiment ~ dnorm(mu, sigma),
-#     mu <- a + b[Candidate],
-#     a ~ dnorm(0, 0.25),
-#     b[Candidate] ~ dnorm(1, 2),
-#     sigma ~ dnorm(0, 1)
-#   ),
-#   data = semFrame, iter = 10000, chains = 4, cores = 4
-# )
+library(rethinking)
+m0_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a,
+    a ~ dnorm(0, 1),
+    sigma ~ dnorm(0, 1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
+m1_bayes_real <- map2stan(
+  alist(
+    sentiment ~ dnorm(mu, sigma),
+    mu <- a + b[Candidate],
+    a ~ dnorm(0, 0.25),
+    b[Candidate] ~ dnorm(1, 2),
+    sigma ~ dnorm(0, 1)
+  ),
+  data = semFrame, iter = 10000, chains = 4, cores = 4
+)
 ```
   
 ```{r}
-# levels(semFrame$Candidate)
-# precis(m0_bayes_real, prob=.95)
-# precis(m1_bayes_real, prob=.95, depth=2)[1:5,]
+levels(semFrame$Candidate)
+precis(m0_bayes_real, prob=.95)
+precis(m1_bayes_real, prob=.95, depth=2)[1:5,]
 ```
 The Bayesian models were used to analyze sentiment data for Donald Trump, Hillary Clinton, and Bernie Sanders. 
 The first model (m0_bayes_real) estimated a slightly negative mean sentiment (-0.072) with a wide 95% credibility interval ranging from -1.701 to 1.821. 
@@ -345,29 +343,29 @@ We noticed some error in the approach using rstan, thus we used the BayesianFirs
 ```{r , warning=FALSE, message=FALSE, results='hide'}
 # include your analysis code and output in the document
 
-# library(BayesianFirstAid)
+library(BayesianFirstAid)
 
-# semFrame_copy = semFrame
+semFrame_copy = semFrame
 
-# # exlucde all rows with candidate = "Donald Trump"
-# semFrame1 <- semFrame_copy[semFrame_copy$Candidate != "Donald Trump",]
-# semFrame1$Candidate <- factor(semFrame1$Candidate, levels = c("Hillary Clinton", "Bernie Sanders"))
+# exlucde all rows with candidate = "Donald Trump"
+semFrame1 <- semFrame_copy[semFrame_copy$Candidate != "Donald Trump",]
+semFrame1$Candidate <- factor(semFrame1$Candidate, levels = c("Hillary Clinton", "Bernie Sanders"))
 
-# semFrame2 <- semFrame_copy[semFrame_copy$Candidate != "Hillary Clinton",]
-# semFrame2$Candidate <- factor(semFrame2$Candidate, levels = c("Donald Trump", "Bernie Sanders"))
+semFrame2 <- semFrame_copy[semFrame_copy$Candidate != "Hillary Clinton",]
+semFrame2$Candidate <- factor(semFrame2$Candidate, levels = c("Donald Trump", "Bernie Sanders"))
 
-# semFrame3 <- semFrame_copy[semFrame_copy$Candidate != "Bernie Sanders",]
-# semFrame3$Candidate <- factor(semFrame3$Candidate, levels = c("Hillary Clinton", "Donald Trump"))
+semFrame3 <- semFrame_copy[semFrame_copy$Candidate != "Bernie Sanders",]
+semFrame3$Candidate <- factor(semFrame3$Candidate, levels = c("Hillary Clinton", "Donald Trump"))
 
-# fit <- bayes.t.test(score ~ Candidate, data = semFrame1)
-# fit2 <- bayes.t.test(score ~ Candidate, data = semFrame2)
-# fit3 <- bayes.t.test(score ~ Candidate, data = semFrame3)
+fit <- bayes.t.test(score ~ Candidate, data = semFrame1)
+fit2 <- bayes.t.test(score ~ Candidate, data = semFrame2)
+fit3 <- bayes.t.test(score ~ Candidate, data = semFrame3)
 ```
 
 ```{r}
-# show(fit)
-# show(fit2)
-# show(fit3)
+show(fit)
+show(fit2)
+show(fit3)
 ```
 The Bayesian estimation comparison between Hillary Clinton and Bernie Sanders suggests a high probability (0.859) that Bernie Sanders has a higher mean sentiment score (0.17) than Hillary Clinton (-0.012), as the difference in their mean sentiments is estimated to be -0.18. When comparing Donald Trump and Bernie Sanders, there's a very high probability (greater than 0.999) that Trump has a higher mean sentiment score (1.0) than Sanders (0.17), with an estimated difference in mean sentiment of 0.84. Similarly, a comparison between Hillary Clinton and Donald Trump suggests a very high probability (greater than 0.999) that Trump (mean sentiment score: 1.0) has a higher sentiment score than Clinton (-0.0088), with an estimated difference in mean sentiment of -1. All these results suggest that, given the data, Donald Trump likely had the highest sentiment score among the three candidates.
 
@@ -421,6 +419,8 @@ We chose these values based on the following reasoning:
 - The version $\beta_2$ is normally distributed around 3 with a standard deviation of 1.
 - The interaction between portal and version $\beta_3$ is normally distributed around 4 with a standard deviation of 1.
 - The standard deviation $\sigma$ is normally distributed around 0 with a standard deviation of 1.
+
+We start with a high base number of page visits regardless of the version of the website or portal. For different versions, we expect the number of page visits to deviate slightly, hence the lower mean for the distributions.
 
 ### Create Synthetic data
 Create a synthetic data set with a clear interaction effect between the two factors for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data.
@@ -479,7 +479,7 @@ anova(m0, m1, m2, m3, m4, test = "Chisq")
 summary(m4)
 AIC(m0, m1, m2, m3, m4)
 ```
-The intercept and the coefficients for version, portal, and version:portal are very close to the values used to generate the synthetic data (10, 2, 2,8, and 3,9, respectively 10, 2, 3, 4 before), and all coefficients are highly significant (p < 2e-16). This confirms that the model has successfully identified and estimated the underlying relationships in the synthetic data.
+The intercept and the coefficients for version, portal, and version:portal are very close to the values used to generate the synthetic data (10, 2, 2.8, and 3.9, respectively 10, 2, 3, 4 before), and all coefficients are highly significant (p < 2e-16). This confirms that the model has successfully identified and estimated the underlying relationships in the synthetic data.
 The model with the best fit is m4 as the AIC was the lowest for m4, which is the model that includes the interaction effect.
 The Multiple R-squared value is 0.9089, indicating that the model explains approximately 91% of the variability in page visits.
 The F-statistic is 319.1 (with a highly significant p-value), indicating that the variation explained by our model is significantly greater than the unexplained variation. This further underscores the strength and validity of our model.
@@ -567,8 +567,6 @@ We also conducted a simple effect analysis to explore the interaction effect in 
 The analysis revealed a significant interaction effect between website version and portal type (p < 0.001). 
 Simple effects analysis showed that the new website version positively influenced the number of pages visited by consumers (p < 0.001), while it had a negative impact on companies (p < 0.001). 
 The interaction between website version and portal type significantly affected the number of pages visited (p < 0.001), with a multiplicative change of approximately 2.79. 
-These findings underscore the importance of tailoring website versions to specific user segments, emphasizing the need for targeted design and optimization strategies to enhance engagement and user experience across different contexts.
-
 
 
 
@@ -594,11 +592,12 @@ $$
 $$
 
 The priors are justified as follows:
-- $\alpha$: The intercept is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the intercept is assumed to be normally distributed around 0, with a standard deviation of 10.
-- $\beta_{\text{version}}$: The version coefficient is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the version coefficient is assumed to be normally distributed around 0, with a standard deviation of 10.
-- $\beta_{\text{portal}}$: The portal coefficient is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the portal coefficient is assumed to be normally distributed around 0, with a standard deviation of 10.
-- $\beta_{\text{version_portal}}$: The interaction coefficient is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the interaction coefficient is assumed to be normally distributed around 0, with a standard deviation of 10.
+- $\alpha$: The intercept is assumed to be normally distributed with a mean of 10 and a standard deviation of 1.
+- $\beta_{\text{version}}$: The version coefficient is assumed to be normally distributed with a mean of 2 and a standard deviation of 1.
+- $\beta_{\text{portal}}$: The portal coefficient is assumed to be normally distributed with a mean of 3 and a standard deviation of 1.
+- $\beta_{\text{version_portal}}$: The interaction coefficient is assumed to be normally distributed with a mean of 4 and a standard deviation of 1.
 
+We start with a high base number of page visits regardless of the version of the website or portal. For different versions, we expect the number of page visits to deviate slightly, hence the lower mean for the distributions.
 
 ####  Verification Analysis
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
@@ -607,70 +606,70 @@ Verify your model analysis with synthetic data and show that it can reproduce th
 # include your analysis code of synthetic data and output in the document
 # include your analysis code of synthetic data and output in the document
 
-# library(rethinking)
-# synthetic_data$portalF <- as.factor(synthetic_data$portal) 
-# synthetic_data$versionF <- as.factor(synthetic_data$version) 
+library(rethinking)
+synthetic_data$portalF <- as.factor(synthetic_data$portal) 
+synthetic_data$versionF <- as.factor(synthetic_data$version) 
 
-# m_synthetic0 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept,
-#     intercept ~ dnorm(10, 10)
-#   ),
-#   data = synthetic_data, iter = 10000, chains = 4, cores = 4
-# )
+m_synthetic0 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept,
+    intercept ~ dnorm(10, 10)
+  ),
+  data = synthetic_data, iter = 10000, chains = 4, cores = 4
+)
 
-# m_synthetic1 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_version * version,
-#     intercept ~ dnorm(10, 10), # Prior for intercept 
-#     beta_version ~ dnorm(2, 10) # Prior for version coefficient
-#   ),
-#   data = synthetic_data, iter = 10000, chains = 4, cores = 4
-# )
+m_synthetic1 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version,
+    intercept ~ dnorm(10, 10), # Prior for intercept 
+    beta_version ~ dnorm(2, 10) # Prior for version coefficient
+  ),
+  data = synthetic_data, iter = 10000, chains = 4, cores = 4
+)
 
-# m_synthetic2 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_portal * portal + beta_interaction * version * portal,
-#     intercept ~ dnorm(10, 10), # Prior for intercept
-#     beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
-#     beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
-#   ),
-#   data = synthetic_data, iter = 10000, chains = 4, cores = 4
-# )
+m_synthetic2 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(10, 10), # Prior for intercept
+    beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
+    beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
+  ),
+  data = synthetic_data, iter = 10000, chains = 4, cores = 4
+)
 
 
-# m_synthetic3 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
-#     intercept ~ dnorm(10, 10), # Prior for intercept
-#     beta_version ~ dnorm(2, 10), # Prior for version coefficient 
-#     beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
-#     beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
-#     ),
-#   data = synthetic_data, iter = 10000, chains = 4, cores = 4
-# )
+m_synthetic3 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(10, 10), # Prior for intercept
+    beta_version ~ dnorm(2, 10), # Prior for version coefficient 
+    beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
+    beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
+    ),
+  data = synthetic_data, iter = 10000, chains = 4, cores = 4
+)
 ```
 
 ```{r}
-# compare(m_synthetic0, m_synthetic1, m_synthetic2, m_synthetic3)
+compare(m_synthetic0, m_synthetic1, m_synthetic2, m_synthetic3)
 ```
 
 
 ```{r}
-# # Get the posterior summary for the model parameters
-# precis(m_synthetic3, depth = 1, prob = 0.95)
-# # Get the posterior summary for the model parameters
-# posterior_summary <- precis(m_synthetic3, depth = 1, prob = 0.95)
-# # Extract the estimated coefficients
-# coefficients <- posterior_summary[, "mean"]
-# # Exponentiate the coefficients
-# exp_coefficients <- exp(coefficients)
-# # Print the exponentiated coefficients
-# print(exp_coefficients)
+# Get the posterior summary for the model parameters
+precis(m_synthetic3, depth = 1, prob = 0.95)
+# Get the posterior summary for the model parameters
+posterior_summary <- precis(m_synthetic3, depth = 1, prob = 0.95)
+# Extract the estimated coefficients
+coefficients <- posterior_summary[, "mean"]
+# Exponentiate the coefficients
+exp_coefficients <- exp(coefficients)
+# Print the exponentiated coefficients
+print(exp_coefficients)
 ```
 From the results we can see that the model with the best fit, which is the one with the lowest
 WAIC score, is m_synthetic3 with a WAIC of 453.2114. 
@@ -686,58 +685,58 @@ Redo the analysis on actual data. Assume Poisson distribution for the number of 
 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 # include your code and output in the document
-# library(rethinking) 
-# m_actual0 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept,
-#     intercept ~ dnorm(10, 10)
-#   ),
-#   data = websitevisits, iter = 10000, chains = 4, cores = 4
-# )
-# m_actual1 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_version * version, 
-#     intercept ~ dnorm(10, 10), # Prior for intercept
-#     beta_version ~ dnorm(2, 10) # Prior for version coefficient
-#   ),
-#   data = websitevisits, iter = 10000, chains = 4, cores = 4
-# )
-# m_actual2 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_portal * portal + beta_interaction * version * portal,
-#     intercept ~ dnorm(10, 10), # Prior for intercept
-#     beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
-#     beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
-#   ),
-#   data = websitevisits, iter = 10000, chains = 4, cores = 4
-# )
-# m_actual3 <- map2stan(
-#   alist(
-#     pages ~ dpois(lambda),
-#     log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
-#     intercept ~ dnorm(10, 10), # Prior for intercept
-#     beta_version ~ dnorm(2, 10), # Prior for version coefficient 
-#     beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
-#     beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
-#   ),
-#   data = websitevisits, iter = 10000, chains = 4, cores = 4
-# )
+library(rethinking) 
+m_actual0 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept,
+    intercept ~ dnorm(10, 10)
+  ),
+  data = websitevisits, iter = 10000, chains = 4, cores = 4
+)
+m_actual1 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version, 
+    intercept ~ dnorm(10, 10), # Prior for intercept
+    beta_version ~ dnorm(2, 10) # Prior for version coefficient
+  ),
+  data = websitevisits, iter = 10000, chains = 4, cores = 4
+)
+m_actual2 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(10, 10), # Prior for intercept
+    beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
+    beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
+  ),
+  data = websitevisits, iter = 10000, chains = 4, cores = 4
+)
+m_actual3 <- map2stan(
+  alist(
+    pages ~ dpois(lambda),
+    log(lambda) <- intercept + beta_version * version + beta_portal * portal + beta_interaction * version * portal,
+    intercept ~ dnorm(10, 10), # Prior for intercept
+    beta_version ~ dnorm(2, 10), # Prior for version coefficient 
+    beta_portal ~ dnorm(3, 10), # Prior for portal coefficient 
+    beta_interaction ~ dnorm(4, 10) # Prior for interaction coefficient
+  ),
+  data = websitevisits, iter = 10000, chains = 4, cores = 4
+)
 ```
 ```{r}
-# compare(m_actual0, m_actual1, m_actual2, m_actual3)
-# precis(m_actual3, depth = 1, prob = 0.95)
+compare(m_actual0, m_actual1, m_actual2, m_actual3)
+precis(m_actual3, depth = 1, prob = 0.95)
 
-# # get the posterior summary for the model parameters
-# posterior_summary <- precis(m_actual3, depth = 1, prob = 0.95)
-# # extract the estimated coefficients
-# coefficients <- posterior_summary[, "mean"]
-# # exponentiate the coefficients
-# exp_coefficients <- exp(coefficients)
-# # print the exponentiated coefficients
-# print(exp_coefficients)
+# get the posterior summary for the model parameters
+posterior_summary <- precis(m_actual3, depth = 1, prob = 0.95)
+# extract the estimated coefficients
+coefficients <- posterior_summary[, "mean"]
+# exponentiate the coefficients
+exp_coefficients <- exp(coefficients)
+# print the exponentiated coefficients
+print(exp_coefficients)
 ```
 Comparing the four models, we see that m_actual3 has the lowest WAIC score of 6057.3 indicating that it is the best fit model. 
 The coefficients of this model are also the exact same as the coefficients generated from the glm() function used earlier with the actual data on the poisson distribution.

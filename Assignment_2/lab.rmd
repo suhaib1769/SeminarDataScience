@@ -32,8 +32,6 @@ t.test(d_B$score,d_M$score)
 linear_model_on_models <- lm(score~model, d)
 summary(linear_model_on_models)
 
-
-
 anova(linear_model_on_models)
 # plot the average score for each model
 library(ggplot2)
