@@ -52,7 +52,7 @@ i = 5; % adjust this value to the desired number of dimensions
 V_i = V(:, 1:i); % take the first i eigenvectors
 
 % Project the centered data onto the new space
-data_projected = data_centered*V_i ; % transpose data_centered to match dimensions
+data_projected = data_centered *V_i ; % transpose data_centered to match dimensions
 
 %% PCA with Gram matrix
 tic;
@@ -79,8 +79,10 @@ size(G);
 
 elapsed_time = toc;
 disp(['Elapsed Time: ' num2str(elapsed_time) ' seconds']);
-%%
+
 % Extract eigenvalues from matrix D
+% diag_D2 = diag(D2);
+% eigenvalues = diag_D2(end-12:end);
 eigenvalues = diag(D2);
 
 % Calculate proportion of variance explained
@@ -100,20 +102,19 @@ title('Scree Plot - PCA with Gram matrix')
 legend('Variance Explained', 'Cumulative Variance Explained')
 grid on
 
-%%
 % Step 5: Compute the basis vectors of the affine spaces
-basis_vectors = V2*data_centered2 ;
+basis_vectors = data_centered2'*V2 ;
 basis_vectors = basis_vectors ./ vecnorm(basis_vectors);
 
-[d2,ind2] = sort(diag(D2),'descend'); % sort eigenvalues in descending order
-V2 = V2(:,ind2); % reorder columns of V2 (eigenvectors) accordingly
+[d2,ind2] = sort(diag(D2),'descend');
+V2 = V2(:,ind2);
 
 i = 5; % adjust this value to the desired number of dimensions
 V2_i = basis_vectors(:, 1:i); % take the first i basis vectors
 
 % Project the centered data onto the new space
-data_projected2 = V2_i' * data_centered2; % transpose data_centered2 to match dimensions
-display(size(basis_vectors))
+data_projected2 = data_centered2*V2_i; % transpose data_centered2 to match dimensions
+display(size(data_projected2))
 
 %% Comparison of PCA with MATLAB's built-in pca function 
 tic
@@ -154,13 +155,15 @@ coeff_i = coeff(:, 1:i); % take the first i principal components
 
 % Project the original data onto the new space
 data_centered3 = data1_matrix - mean(data1_matrix); % center the original data
-data_projected3 = coeff_i' * data_centered3'; % transpose data_centered3 to match dimensions
+data_projected3 =  data_centered3*coeff_i; % transpose data_centered3 to match dimensions
 
 % Display the eigenvalues (or explained variances) for each method
 disp('Eigenvalues for method 1:')
 disp(diag(D))
 disp('Eigenvalues for method 2:')
-disp(diag(D2))
+diag_D2 = diag(D2);
+last_13_values = diag_D2(end-12:end);
+disp(last_13_values);
 disp('Eigenvalues for method 3:')
 disp(latent)
 
