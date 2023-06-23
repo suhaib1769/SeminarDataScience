@@ -1,11 +1,28 @@
-% Load data
-data = readtable('AirQualityUCI.csv', 'VariableNamingRule', 'preserve');
-data = data(:,3:end);
-data_matrix = table2array(data);
+%% Load data
+% Specify the directory where the images are stored
+imgDir = 'ImageData'; % Replace with your path
+
+% Get a list of all jpg files in the image directory
+imgFiles = dir(fullfile(imgDir, '*.jpg'));
+
+% Preallocate a matrix to hold all of the image data
+numImages = length(imgFiles);
+imgSize = size(imread(fullfile(imgDir, imgFiles(1).name)));
+X = zeros(prod(imgSize), numImages);
+
+% Loop over the images and store them in the matrix
+for i = 1:numImages
+    img = imread(fullfile(imgDir, imgFiles(i).name));
+    X(:, i) = img(:);
+end
+
+X= X';
 
 %% Snapshot PCA: Random selection of datapoints
-fraction = 0.1;
+fraction = 0.5;
 tic;
+
+data_matrix = X;
 
 % Randomize data points
 n = size(data_matrix, 1);
@@ -26,6 +43,12 @@ G = data_centered2 * data_centered2';
 % Step 4: Compute eigenvalues and eigenvectors of the Gram matrix
 [V2, D2] = eig(G);
 
+% disp('Gram')
+% disp('Eigenvalues:')
+% disp(diag(D2))
+% disp('Eigenvectors:')
+% disp(V2);
+
 [d2,ind2] = sort(diag(D2),'descend'); % sort eigenvalues in descending order
 V2 = V2(:,ind2); % reorder columns of V2 (eigenvectors) accordingly
 % Extract eigenvalues from matrix D
@@ -45,25 +68,25 @@ i = 13;
 V2_i = basis_vectors(:, 1:i); % take the first i basis vectors
 
 % Project the centered data onto the new space
-data_projected2 = data_centered2 * V2_i'; % transpose data_centered2 to match dimensions
+data_projected2 = data_centered2' * V2_i; % transpose data_centered2 to match dimensions
+elapsed_time = toc;
 
-elapsed_time_snapshot = toc;
 %% MATLAB built-in PCA
 tic;
-[coeff, score, ~, tsquared, explained] = pca(data_matrix);
+[coeff, score, ~, tsquared, explained] = pca(X);
 time_matlab = toc;
 
 %% Nystrom method
 % Define the data
-X = data_matrix;
+
 tic;
-mu = mean(data_matrix);
+mu = mean(X);
 
 % Center the data
-X_centered = bsxfun(@minus, X, mean(X, 1));
+X_centered = X - mu;
 
 % Randomize data points
-fraction = 1;
+fraction = 0.001;
 n = size(X_centered, 2);
 l = round(n * fraction);
 % indices = randperm(n, l);
@@ -104,21 +127,20 @@ variance_explained = eigenvalues / sum(eigenvalues);
 cumulative_variance_explained = cumsum(variance_explained);
 time_nystrom = toc;
 
-% Step 9: Plot the scree plot
-figure
-plot(1:numel(eigenvalues), variance_explained, 'bo-')
-hold on
-plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
-xlabel('Principal Component')
-ylabel('Proportion of Variance Explained')
-title('Scree Plot - in built PCA')
-legend('Variance Explained', 'Cumulative Variance Explained')
-grid on
-
+% % Plot the scree plot
+% figure
+% plot(1:numel(eigenvalues), variance_explained, 'bo-')
+% hold on
+% plot(1:numel(eigenvalues), cumulative_variance_explained, 'ro-')
+% xlabel('Principal Component')
+% ylabel('Proportion of Variance Explained')
+% title('Scree Plot - PCA with covariance matrix')
+% legend('Variance Explained', 'Cumulative Variance Explained')
+% grid on
 
 %% Compare results
 
-k = 4;
+k = 9;
 % Compute and compare reconstruction errors
 reconstructed_matlab_k = score(:, 1:k) * coeff(:, 1:k)' + mu;
 % Project the data onto the PCA modes
@@ -127,6 +149,24 @@ projected_X_k = X * U_hat(:, 1:k);
 reconstructed_nystrom_k = projected_X_k * U_hat(:, 1:k)';
 error_matlab = sum(sum((X - reconstructed_matlab_k).^2));
 error_nystrom = sum(sum((X - reconstructed_nystrom_k).^2));
+
+% Visualize the first reconstructed image
+first_reconstructed_img = reconstructed_nystrom_k(3, :);
+
+% Reshape the image data back to its original size
+first_reconstructed_img = reshape(first_reconstructed_img, imgSize);
+
+% Display the image
+imshow(first_reconstructed_img);
+
+% Visualize the first reconstructed image
+sec_reconstructed_img = reconstructed_nystrom_k(5, :);
+
+% Reshape the image data back to its original size
+sec_reconstructed_img = reshape(sec_reconstructed_img, imgSize);
+
+% Display the image
+imshow(sec_reconstructed_img);
 
 % Extract the diagonal elements, which are the eigenvalues
 lambda_values = diag(dia_lambda);
@@ -143,7 +183,7 @@ explained_nystrom = lambda_values / total_lambda * 100; % Convert to percentage
 % Compare computation times
 fprintf('Computation time (MATLAB PCA): %f seconds\n', time_matlab);
 fprintf('Computation time (Nystrom method): %f seconds\n', time_nystrom);
-fprintf('Computation time (Snapshot PCA): %f seconds\n', elapsed_time_snapshot);
+fprintf('Computation time (Snapshot PCA): %f seconds\n', elapsed_time);
 
 % Compare reconstruction errors
 fprintf('Reconstruction error (MATLAB PCA): %f\n', error_matlab);
@@ -151,8 +191,7 @@ fprintf('Reconstruction error (Nystrom method): %f\n', error_nystrom);
 % fprintf('Reconstruction error (Snapshot PCA): %f\n', reconstruction_error);
 
 % Compare explained variance for the first few components
-fprintf('Explained variance (MATLAB PCA): %s\n', num2str(explained(1:10)'));
+fprintf('Explained variance (MATLAB PCA): %s\n', num2str(explained(1:9)'));
 fprintf('Explained variance (Nystrom method): %s\n', num2str(explained_nystrom(1:l)'));
 % fprintf('Explained variance (Snapshot PCA): %s\n', num2str(explained_variance_snapshot(1:1)'));
-
 whos('G', 'data_matrix', 'score', 'coeff', 'X_centered', 'C1', 'C_hat', 'A', 'B', 'U_A', 'U_hat')
