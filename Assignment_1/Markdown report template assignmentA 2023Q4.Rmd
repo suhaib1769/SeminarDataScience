@@ -31,10 +31,10 @@ The main theory which encompasses this topic is within the field of educational 
 What are the differences in learning outcomes, intrinsic motivation, and perceived difficulty between students who have access to a conversational AI tool (e.g., Chat-GPT) and those who rely on traditional coding resources while completing a challenging coding assignment?
 
 ## The related conceptual model 
-Independent variable(s): Use of chatgpt for an assignment
-Dependent variable: Grade received for the assignment
-Mediating variable (at least 1): Motivation, Interest
-Moderating variable (at least 1): Experience level: Number of years in university (the student a 1st year bachelor or a final year masters student, or somewhere in between)
+Independent variable(s): Use of chatgpt for an assignment.
+Dependent variable: Grade received for the assignment.
+Mediating variable: Motivation, Interest.
+Moderating variable: Experience level: Number of years in university (the student a 1st year bachelor or a final year masters student, or somewhere in between)
 
 ## Experimental Design 
 ##### Experimental Design (the study should have a true experimental design to test a single hypothesis that, for simplicity, includes only independent variable(s) and dependent variable(s). In other words, mediating and moderating variables are not included in the experimental design ) 
@@ -235,7 +235,7 @@ The difference in sentiment of the tweets is significant with Bonferroni correct
 #### Report section for a scientific publication
 ##### Write a small section for a scientific publication (journal or a conference), in which you report the results of the analyses, and explain the conclusions that can be drawn in a format commonly used by the scientific community Look at Brightspace for examples papers and guidelines on how to do this. (Hint, there are strict guidelines for reporting statistical results in paper, I expect you to follow these here) 
 
-The analysis of variance (ANOVA) was performed to compare the fit of two models: Model 1 and Model 2. Model 1 represents the null model, while Model 2 includes the additional predictor variable.
+The analysis of variance (ANOVA) was performed to compare the fit of two models: Model 1 and Model 2. Model 1 represents the null model, while Model 2 includes the additional predictor variable, candidate.
 
 The results of the ANOVA revealed a significant difference between the models, indicating that the inclusion of the predictor variable, the candidate that the tweet was about, significantly improved the fit of the model, F(2, 297) = 14.31, p < 0.05.
 
@@ -245,7 +245,7 @@ The F-value of 14.31 indicates the ratio of the variance explained by the Candid
 These findings collectively support the hypothesis that the Candidate variable is a significant factor in explaining the variation in the scores. The results suggest that Model 2, which includes the Candidate variable, provides a more accurate representation of the relationship between the Candidate and the scores compared to Model 1.
 
 We also conducted a post hoc analysis to examine pairwise comparisons between the scores of different candidates using the Bonferroni adjustment method. The analysis was performed using a pairwise t-test.
-The pairwise comparisons revealed significant differences in scores between certain candidates. Specifically, the scores of Hillary Clinton and Donald Trump were significantly different (p < 0.01), with Donald Trump exhibiting higher scores compared to Hillary Clinton. Additionally, the scores of Bernie Sanders and Hillary Clinton were also significantly different (p = 0.00011), with Bernie Sanders having higher scores compared to Hillary Clinton.
+The pairwise comparisons revealed significant differences in scores between certain candidates. Specifically, the scores of Hillary Clinton and Donald Trump were significantly different (p < 0.01), with Donald Trump exhibiting higher scores compared to Hillary Clinton. Additionally, the scores of Bernie Sanders and Hillary Clinton were also significantly different (p < 0.001), with Bernie Sanders having higher scores compared to Hillary Clinton.
 These findings suggest that there are significant variations in the sentiment expressed towards different candidates. Specifically, Donald Trump received higher sentiment scores compared to Hillary Clinton, while Bernie Sanders received higher sentiment scores compared to Hillary Clinton.
 The Bonferroni adjustment method was employed to address multiple comparisons, ensuring a stricter control of the overall type I error rate. This adjustment method accounts for the increased risk of false positives when conducting multiple comparisons.
 Overall, the post hoc analysis provides further insights into the sentiment differences between candidates and supports the notion that the sentiment expressed towards different candidates varies significantly.
