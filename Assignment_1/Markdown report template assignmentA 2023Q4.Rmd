@@ -420,6 +420,8 @@ We chose these values based on the following reasoning:
 - The interaction between portal and version $\beta_3$ is normally distributed around 4 with a standard deviation of 1.
 - The standard deviation $\sigma$ is normally distributed around 0 with a standard deviation of 1.
 
+We start with a high base number of page visits regardless of the version of the website or portal. For different versions, we expect the number of page visits to deviate slightly, hence the lower mean for the distributions.
+
 ### Create Synthetic data
 Create a synthetic data set with a clear interaction effect between the two factors for verifying your analysis later on. Report the values of the coefficients of the linear model used to generate synthetic data.
 
@@ -477,7 +479,7 @@ anova(m0, m1, m2, m3, m4, test = "Chisq")
 summary(m4)
 AIC(m0, m1, m2, m3, m4)
 ```
-The intercept and the coefficients for version, portal, and version:portal are very close to the values used to generate the synthetic data (10, 2, 2,8, and 3,9, respectively 10, 2, 3, 4 before), and all coefficients are highly significant (p < 2e-16). This confirms that the model has successfully identified and estimated the underlying relationships in the synthetic data.
+The intercept and the coefficients for version, portal, and version:portal are very close to the values used to generate the synthetic data (10, 2, 2.8, and 3.9, respectively 10, 2, 3, 4 before), and all coefficients are highly significant (p < 2e-16). This confirms that the model has successfully identified and estimated the underlying relationships in the synthetic data.
 The model with the best fit is m4 as the AIC was the lowest for m4, which is the model that includes the interaction effect.
 The Multiple R-squared value is 0.9089, indicating that the model explains approximately 91% of the variability in page visits.
 The F-statistic is 319.1 (with a highly significant p-value), indicating that the variation explained by our model is significantly greater than the unexplained variation. This further underscores the strength and validity of our model.
@@ -565,8 +567,6 @@ We also conducted a simple effect analysis to explore the interaction effect in 
 The analysis revealed a significant interaction effect between website version and portal type (p < 0.001). 
 Simple effects analysis showed that the new website version positively influenced the number of pages visited by consumers (p < 0.001), while it had a negative impact on companies (p < 0.001). 
 The interaction between website version and portal type significantly affected the number of pages visited (p < 0.001), with a multiplicative change of approximately 2.79. 
-These findings underscore the importance of tailoring website versions to specific user segments, emphasizing the need for targeted design and optimization strategies to enhance engagement and user experience across different contexts.
-
 
 
 
@@ -592,11 +592,12 @@ $$
 $$
 
 The priors are justified as follows:
-- $\alpha$: The intercept is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the intercept is assumed to be normally distributed around 0, with a standard deviation of 10.
-- $\beta_{\text{version}}$: The version coefficient is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the version coefficient is assumed to be normally distributed around 0, with a standard deviation of 10.
-- $\beta_{\text{portal}}$: The portal coefficient is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the portal coefficient is assumed to be normally distributed around 0, with a standard deviation of 10.
-- $\beta_{\text{version_portal}}$: The interaction coefficient is assumed to be normally distributed with a mean of 0 and a standard deviation of 10. This is because the interaction coefficient is assumed to be normally distributed around 0, with a standard deviation of 10.
+- $\alpha$: The intercept is assumed to be normally distributed with a mean of 10 and a standard deviation of 1.
+- $\beta_{\text{version}}$: The version coefficient is assumed to be normally distributed with a mean of 2 and a standard deviation of 1.
+- $\beta_{\text{portal}}$: The portal coefficient is assumed to be normally distributed with a mean of 3 and a standard deviation of 1.
+- $\beta_{\text{version_portal}}$: The interaction coefficient is assumed to be normally distributed with a mean of 4 and a standard deviation of 1.
 
+We start with a high base number of page visits regardless of the version of the website or portal. For different versions, we expect the number of page visits to deviate slightly, hence the lower mean for the distributions.
 
 ####  Verification Analysis
 Verify your model analysis with synthetic data and show that it can reproduce the coefficients of the linear model that you used to generate the synthetic data set. Provide a short interpretation of the results, with a reflection of WAIC, and 95% credibility interval of coefficients for individual celebrities.
