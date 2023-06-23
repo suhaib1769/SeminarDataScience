@@ -105,11 +105,17 @@ The transfer learning models were first trained on 8 different training data set
 Estimated marginal means (EMMs) were calculated for each model adjusted for the training sets used. These provide an estimate of the mean performance score for each model, adjusted for the training sets used by the models. The EMMs can not be calculated for the baseline models and MS since they don’t use any training data. The EMM differs slightly compared to the normal mean:
 
 ```{r, echo=FALSE}
-# Aggregate 
-aggregate(score~model, data = d, mean)
-# EMMs
-emm <- emmeans(linear_model_model_trainD, ~ model)
-emm
+# filter all rows with TeD = "TeD1"
+d_MS <- d_M[d_M$model == "MS", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+d_MN <- d_M[d_M$model == "MN", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+d_M1 <- d_M[d_M$model == "M1", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+d_M2 <- d_M[d_M$model == "M2", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+d_M3 <- d_M[d_M$model == "M3", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+d_MF <- d_M[d_M$model == "MF", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+score_sum_model <- lm(score~TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8 + TeD, data=d_MS)
+# print(summary(score_sum_model))
+emm <- emmeans(score_sum_model, ~TrD1 * TrD2 * TrD3 * TrD4 * TrD5 * TrD6 * TrD7 * TrD8)
+print(summary(emm))
 ```
 
 
@@ -118,4 +124,4 @@ To find out if the differences are significant, a linear model was fitted on the
 
 Overall the effect of the training sets used is very small as the multiple R-squared value for the linear regression model was found to be 0.03657 (adjusted R-squared: 0.01943). This indicates that the combination of the independent variables, model type and TrD1-TrD8 variables, explains approximately 3.657% of the variance observed in the dependent variable, score.
 
-Thereful it can be concluded that the training sets used for the models only has an insignificant impact on model performance. The relatively low R-squared value and the absence of significant effects in most models suggest that the choice of training sets does not considerably affect the scores. It's noteworthy, however, that specific models like MS have shown significant relationships with certain training datasets, indicating that for some models, their performance could be sensitive to the choice of training datasets.
+Therefor it can be concluded that the training sets used for the models only has an insignificant impact on model performance. The relatively low R-squared value and the absence of significant effects in most models suggest that the choice of training sets does not considerably affect the scores. It's noteworthy, however, that specific models like MS have shown significant relationships with certain training datasets, indicating that for some models, their performance could be sensitive to the choice of training datasets.
