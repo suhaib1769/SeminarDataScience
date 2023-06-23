@@ -20,6 +20,7 @@ table(d$model, d$TeD)
 table(d$model, d$TrD1)
 table(d$model, d$TrD2)
 aggregate(score~model, data = d, mean)
+library(dplyr)
 ```
 
 ```{r rq one, include=FALSE}
@@ -102,24 +103,124 @@ In conclusion, the analysis shows that while model type explains a portion of th
 ### RQ2: How is model performance affected by the choice of training datasets?
 The transfer learning models were first trained on 8 different training data sets. They all contain the same instances but differ in the particularities of the task (eg. classification, ranking, etc) and ground truth. The distribution of training data sets over the models was imbalanced. The m1 model had for instance used training data set 1 33% times more than training data set 2. 
 
+```{r, echo=FALSE}
+library(tidyverse)
+
+# Reshape data
+d_long <- d %>% pivot_longer(cols = starts_with("TrD"),
+                             names_to = "TrD",
+                             values_to = "value")
+
+# Filter data for non-zero values (assuming 1 means the score belongs to that training dataset)
+d_filtered <- d_long %>% filter(value == 1)
+
+# Plot
+ggplot(d_filtered, aes(x = TrD, y = score, color = TeD)) +
+  geom_point(alpha = 0.6, position = position_jitter(w = 0.1, h = 0)) +
+  theme_minimal() +
+  labs(x = "Training Dataset", y = "Score",
+       title = "Distribution of scores for each test dataset across training datasets",
+       color = "Test Dataset") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
 Estimated marginal means (EMMs) were calculated for each model adjusted for the training sets used. These provide an estimate of the mean performance score for each model, adjusted for the training sets used by the models. The EMMs can not be calculated for the baseline models and MS since they don’t use any training data. The EMM differs slightly compared to the normal mean:
 
 ```{r, echo=FALSE}
-# filter all rows with TeD = "TeD1"
-d_MS <- d_M[d_M$model == "MS", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
-d_MN <- d_M[d_M$model == "MN", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
-d_M1 <- d_M[d_M$model == "M1", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
-d_M2 <- d_M[d_M$model == "M2", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
-d_M3 <- d_M[d_M$model == "M3", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
-d_MF <- d_M[d_M$model == "MF", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
-score_sum_model <- lm(score~TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8 + TeD, data=d_MS)
-# print(summary(score_sum_model))
-emm <- emmeans(score_sum_model, ~TrD1 * TrD2 * TrD3 * TrD4 * TrD5 * TrD6 * TrD7 * TrD8)
-print(summary(emm))
+model_list <- list()
+
+model_list$MS <- d_M[d_M$model == "MS", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$MN <- d_M[d_M$model == "MN", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$M1 <- d_M[d_M$model == "M1", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$M2 <- d_M[d_M$model == "M2", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$M3 <- d_M[d_M$model == "M3", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$MF <- d_M[d_M$model == "MF", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+
+training_sets <- names(model_list$MS)[grepl("TrD", names(model_list$MS))]  # Extract TrD column names
+
+combined_results <- data.frame()  # Initialize an empty data frame
+
+for (train_set in training_sets) {
+   for (model_name in names(model_list)) {
+      model_data <- model_list[[model_name]]
+      formula_str <- paste("score ~", train_set, " + TeD")
+      score_sum_model <- lm(as.formula(formula_str), data = model_data)
+      emm_TrD1 <- emmeans(score_sum_model, as.formula(paste("~", train_set)), data = model_data)
+  
+      # Get all pairwise comparisons, including non-significant ones
+      pairwise_comp <- as.data.frame(pairs(emm_TrD1))
+      # Add model name as a column to identify the results
+      pairwise_comp$model_name <- model_name
+      
+      # Combine the pairwise comparison results
+      combined_results <- bind_rows(combined_results, pairwise_comp)
+   }
+}
+
+# Round p.value column to three decimal places
+combined_results$p.value <- round(combined_results$p.value, 6)
+
+# Filter out rows with absolute estimate smaller than 0.01 and p-value greater than 0.01
+filtered_results <- combined_results %>%
+  filter(abs(estimate) >= 0.01, p.value <= 0.01)
+
+
+# Print the filtered results
+if (nrow(filtered_results) > 0) {
+  print(filtered_results)
+} else {
+  print("No pairwise comparisons found.")
+}
+
 ```
 
 
+```{r, echo=FALSE}
+model_list <- list()
 
+model_list$MS <- d_M[d_M$model == "MS", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$MN <- d_M[d_M$model == "MN", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$M1 <- d_M[d_M$model == "M1", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$M2 <- d_M[d_M$model == "M2", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$M3 <- d_M[d_M$model == "M3", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+model_list$MF <- d_M[d_M$model == "MF", c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8", "TeD", "score", "Sum")]
+
+training_sets <- names(model_list$MS)[grepl("TrD", names(model_list$MS))]  # Extract TrD column names
+
+combined_results <- data.frame()  # Initialize an empty data frame
+for (model_name in names(model_list)) {
+   for (train_set in training_sets) {
+      model_data <- model_list[[model_name]]
+      formula_str <- paste("score ~", train_set, " + TeD")
+      score_sum_model <- lm(as.formula(formula_str), data = model_data)
+      emm_TrD1 <- emmeans(score_sum_model, as.formula(paste("~", train_set)), data = model_data)
+  
+      # Get all pairwise comparisons, including non-significant ones
+      pairwise_comp <- as.data.frame(pairs(emm_TrD1))
+      # Add model name as a column to identify the results
+      pairwise_comp$model_name <- model_name
+      
+      # Combine the pairwise comparison results
+      combined_results <- bind_rows(combined_results, pairwise_comp)
+   }
+}
+
+# Round p.value column to three decimal places
+combined_results$p.value <- round(combined_results$p.value, 6)
+
+# Filter out rows with absolute estimate smaller than 0.01 and p-value greater than 0.01
+filtered_results <- combined_results %>%
+  filter(abs(estimate) >= 0.00000001, p.value <= 1)
+
+
+# Print the filtered results
+if (nrow(filtered_results) > 0) {
+  print(filtered_results)
+} else {
+  print("No pairwise comparisons found.")
+}
+
+```
 To find out if the differences are significant, a linear model was fitted on the scoring outcomes of the models, taking the training sets as independent variables. This was done on all the different transfer learning models. In most cases, there was no significant differences found but for the MS model the analysis found a significant effect  (F(1, 1) = 4.8530, p = 0.02829) for training set one and for the MS model the analysis found a significant effect (F(1, 1) = 8.7536, p = 0.003223) for training set one. 
 
 Overall the effect of the training sets used is very small as the multiple R-squared value for the linear regression model was found to be 0.03657 (adjusted R-squared: 0.01943). This indicates that the combination of the independent variables, model type and TrD1-TrD8 variables, explains approximately 3.657% of the variance observed in the dependent variable, score.
