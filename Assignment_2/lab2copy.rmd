@@ -1,0 +1,131 @@
+---
+title: "Coursework assignment A - 2022-2023"
+subtitle: "CS4125 Seminar Research Methodology for Data Science"
+author: "Student names"
+date: "16/04/2023"
+output:
+   pdf_document:
+      fig_caption: true
+      number_sections: true 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+\tableofcontents
+
+# Loading data
+```{r load data}
+setwd("C:/Users/ottev/TU Delft/Year4/Quarter4/CDA/SeminarDataScience/Assignment_2")
+d <- read.csv("data.csv")
+```
+
+
+```{r load}
+# convert the model column to a factor as it is a categorical variable
+d$model <- factor(d$model)
+# convert the TeD column to a factor as it is a categorical variable
+d$TeD <- factor(d$TeD)
+```
+
+
+```{r load libraries}
+# Create variables model type and parts refined
+d$model_type <- ifelse(d$model %in% c("B1", "B2", "B3"), "Baseline", "Transfer_Learning")
+d$num_parts_refined <- ifelse(d$model == "MF", 4,
+                          ifelse(d$model == "MS", 1,
+                           ifelse(d$model == "MN", 0,
+                          ifelse(grepl("^M[1-8]$", d$model), as.numeric(substr(d$model, 2, 2)), 0))))
+```
+
+```{r}
+# Anova with all parts
+model <- lm(score ~ model_type + model + TeD + num_parts_refined + (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8) + Sum , data = d)
+anova_result <- anova(model)
+print(anova_result)
+```
+
+```{r, include=FALSE}
+# Load required packages
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(emmeans)
+```
+```{r}
+# Normalize scores for each test dataset
+d <- d %>%
+  group_by(TeD) %>%
+  mutate(score = (score - mean(score)) / sd(score))
+
+# Anova with all parts
+model <- lm(score ~ model_type + (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8), data = d)
+summary(model)
+
+# Compute EMMs for the interaction effect
+emms_interaction <- emmeans(model, ~ model_type)
+pairwise <- pairs(emms_interaction)
+summary(pairwise)
+
+```
+```{r}
+# Reshape data
+d_long <- d %>% pivot_longer(cols = starts_with("TrD"),
+                             names_to = "TrD",
+                             values_to = "value")
+
+# Filter data for non-zero values (assuming 1 means the score belongs to that training dataset)
+d_filtered <- d_long %>% filter(value == 1)
+
+# Calculate average score for each combination of TrD and TeD
+avg_scores <- d_filtered %>%
+  group_by(TrD, TeD) %>%
+  summarise(avg_score = mean(score))
+
+# Plot
+ggplot(avg_scores, aes(x = TrD, y = avg_score, color = TeD)) +
+  geom_point(alpha = 0.6, position = position_dodge(width = 0.5)) +
+  geom_line(aes(group = TeD), position = position_dodge(width = 0.5)) +
+  theme_minimal() +
+  labs(x = "Training Dataset", y = "Average Score",
+       title = "Average scores for each test dataset across training datasets",
+       color = "Test Dataset") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+# Compute the average performance for each combination of TeD and TrD
+correlation_data <- d %>%
+  gather(key = "TrD", value = "used", -TeD, -model, -score) %>%
+  filter(used == 1) %>%
+  group_by(TeD, TrD) %>%
+  summarise(avg_score = mean(score, na.rm = TRUE))
+
+# Create the heatmap
+ggplot(correlation_data, aes(x = TrD, y = TeD)) +
+  geom_tile(aes(fill = avg_score), color = "white") +
+  scale_fill_gradient(low = "white", high = "red") +
+  theme_minimal() +
+  labs(title = "Correlation between TrDs and TeDs", fill = "Average Score")
+
+# # t test between B1, B2, and B3 vs the rest
+# d_B <- subset(d, model=="B1" | model=="B2" | model=="B3")
+# d_M <- subset(d, model=="M1" | model=="M2" | model=="M3" | model=="MF" | model=="MN" | model=="MS")
+
+
+
+# # average for each model
+# aggregate(score ~ model, data = d, mean)
+# m <- lm(score~model, d)
+# summary(m)
+# AIC(m)
+
+# m1 <- lm(score~model+TeD, d)
+# summary(m1)
+# AIC(m1)
+
+# # compare m and m1
+# anova(m, m1)
+```
+
