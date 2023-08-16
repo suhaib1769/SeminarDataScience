@@ -59,55 +59,71 @@ library(emmeans)
 d <- d %>%
   group_by(TeD) %>%
   mutate(score = (score - mean(score)) / sd(score))
+```
+# Research Question 1
+```{r}
+# Anova with normalization
+model <- lm(score ~ model_type + model + TeD + num_parts_refined + (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8) + Sum , data = d)
+anova_result <- anova(model)
+print(anova_result)
 
-# Anova with all parts
+
 model <- lm(score ~ model_type + (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8), data = d)
+model2 <- lm(score ~ model + (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8), data = d)
 summary(model)
+summary(model2)
+anova(model)
+anova(model2)
 
 # Compute EMMs for the interaction effect
 emms_interaction <- emmeans(model, ~ model_type)
+emms_interaction2 <- emmeans(model2, ~ model)
+emms_interaction
+emms_interaction2
 pairwise <- pairs(emms_interaction)
+pairwise2 <- pairs(emms_interaction2)
 summary(pairwise)
-
+summary(pairwise2)
 ```
+# Research Question 2
 ```{r}
-# Reshape data
-d_long <- d %>% pivot_longer(cols = starts_with("TrD"),
-                             names_to = "TrD",
-                             values_to = "value")
+# # Reshape data
+# d_long <- d %>% pivot_longer(cols = starts_with("TrD"),
+#                              names_to = "TrD",
+#                              values_to = "value")
 
-# Filter data for non-zero values (assuming 1 means the score belongs to that training dataset)
-d_filtered <- d_long %>% filter(value == 1)
+# # Filter data for non-zero values (assuming 1 means the score belongs to that training dataset)
+# d_filtered <- d_long %>% filter(value == 1)
 
-# Calculate average score for each combination of TrD and TeD
-avg_scores <- d_filtered %>%
-  group_by(TrD, TeD) %>%
-  summarise(avg_score = mean(score))
+# # Calculate average score for each combination of TrD and TeD
+# avg_scores <- d_filtered %>%
+#   group_by(TrD, TeD) %>%
+#   summarise(avg_score = mean(score))
 
-# Plot
-ggplot(avg_scores, aes(x = TrD, y = avg_score, color = TeD)) +
-  geom_point(alpha = 0.6, position = position_dodge(width = 0.5)) +
-  geom_line(aes(group = TeD), position = position_dodge(width = 0.5)) +
-  theme_minimal() +
-  labs(x = "Training Dataset", y = "Average Score",
-       title = "Average scores for each test dataset across training datasets",
-       color = "Test Dataset") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# # Plot
+# ggplot(avg_scores, aes(x = TrD, y = avg_score, color = TeD)) +
+#   geom_point(alpha = 0.6, position = position_dodge(width = 0.5)) +
+#   geom_line(aes(group = TeD), position = position_dodge(width = 0.5)) +
+#   theme_minimal() +
+#   labs(x = "Training Dataset", y = "Average Score",
+#        title = "Average scores for each test dataset across training datasets",
+#        color = "Test Dataset") +
+#   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
-# Compute the average performance for each combination of TeD and TrD
-correlation_data <- d %>%
-  gather(key = "TrD", value = "used", -TeD, -model, -score) %>%
-  filter(used == 1) %>%
-  group_by(TeD, TrD) %>%
-  summarise(avg_score = mean(score, na.rm = TRUE))
+# # Compute the average performance for each combination of TeD and TrD
+# correlation_data <- d %>%
+#   gather(key = "TrD", value = "used", -TeD, -model, -score) %>%
+#   filter(used == 1) %>%
+#   group_by(TeD, TrD) %>%
+#   summarise(avg_score = mean(score, na.rm = TRUE))
 
-# Create the heatmap
-ggplot(correlation_data, aes(x = TrD, y = TeD)) +
-  geom_tile(aes(fill = avg_score), color = "white") +
-  scale_fill_gradient(low = "white", high = "red") +
-  theme_minimal() +
-  labs(title = "Correlation between TrDs and TeDs", fill = "Average Score")
+# # Create the heatmap
+# ggplot(correlation_data, aes(x = TrD, y = TeD)) +
+#   geom_tile(aes(fill = avg_score), color = "white") +
+#   scale_fill_gradient(low = "white", high = "red") +
+#   theme_minimal() +
+#   labs(title = "Correlation between TrDs and TeDs", fill = "Average Score")
 
 # # t test between B1, B2, and B3 vs the rest
 # d_B <- subset(d, model=="B1" | model=="B2" | model=="B3")
