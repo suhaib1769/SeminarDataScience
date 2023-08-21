@@ -18,7 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Loading data
 ```{r load data}
-setwd("C:/Users/ottev/TU Delft/Year4/Quarter4/CDA/SeminarDataScience/Assignment_2")
+# SET YOUR OWN WORKING DIRECTORY HERE
+setwd("/Users/suhaibbasir/Documents/CS/MSc/SRDS/SeminarDataScience/Assignment_2")
 d <- read.csv("data.csv")
 ```
 
@@ -180,6 +181,15 @@ ggplot(avg_scores, aes(x = TrD, y = avg_score, color = TeD)) +
        color = "Test Dataset") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+ggplot(d, aes(x = factor(Sum), y = score)) +
+  geom_boxplot() +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  theme_minimal() +
+  labs(x = "Number of training datasets used", y = "Score",
+       title = "Distribution of scores for each number of training datasets used",
+       fill = "Test Dataset") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 library(ggplot2)
 
@@ -214,6 +224,8 @@ my_plot <- ggplot(df, aes(x=TeD, y=Estimate, fill=TeD)) +
   theme(legend.position="none") +
   labs(x = "TeD", y = "Estimate") +
   guides(fill = guide_legend(title = NULL))
+
+my_plot
 
 # Save the plot with adjusted dimensions
 ggsave("my_plot.png", my_plot, width = 10, height = 16, units = "in")
