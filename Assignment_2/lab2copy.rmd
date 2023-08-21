@@ -63,7 +63,7 @@ d <- d %>%
 # Research Question 1
 ```{r}
 # Anova with normalization
-model <- lm(score ~ model_type + model + TeD + num_parts_refined + (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8) + Sum , data = d)
+model <- lm(score ~ (model_type + model + num_parts_refined + Sum + TeD) * (TrD1 + TrD2 + TrD3 + TrD4 + TrD5 + TrD6 + TrD7 + TrD8) , data = d)
 anova_result <- anova(model)
 print(anova_result)
 
@@ -87,61 +87,135 @@ summary(pairwise2)
 ```
 # Research Question 2
 ```{r}
-# # Reshape data
-# d_long <- d %>% pivot_longer(cols = starts_with("TrD"),
-#                              names_to = "TrD",
-#                              values_to = "value")
+# Looking into the effect of the sum
+d$number_of_training_datasets <- rowSums(d[,c("TrD1", "TrD2", "TrD3", "TrD4", "TrD5", "TrD6", "TrD7", "TrD8")])
+model <- lm(score ~ model_type * model * TeD + number_of_training_datasets, data = d)
+anova_result <- anova(model)
+print(anova_result)
 
-# # Filter data for non-zero values (assuming 1 means the score belongs to that training dataset)
-# d_filtered <- d_long %>% filter(value == 1)
+fit <- lm(score ~ TrD1 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD1 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
 
-# # Calculate average score for each combination of TrD and TeD
-# avg_scores <- d_filtered %>%
-#   group_by(TrD, TeD) %>%
-#   summarise(avg_score = mean(score))
+fit <- lm(score ~ TrD2 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD2 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
 
-# # Plot
-# ggplot(avg_scores, aes(x = TrD, y = avg_score, color = TeD)) +
-#   geom_point(alpha = 0.6, position = position_dodge(width = 0.5)) +
-#   geom_line(aes(group = TeD), position = position_dodge(width = 0.5)) +
-#   theme_minimal() +
-#   labs(x = "Training Dataset", y = "Average Score",
-#        title = "Average scores for each test dataset across training datasets",
-#        color = "Test Dataset") +
-#   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+fit <- lm(score ~ TrD3 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD3 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
+
+fit <- lm(score ~ TrD4 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD4 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
+
+fit <- lm(score ~ TrD5 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD5 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
+
+fit <- lm(score ~ TrD6 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD6 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
+
+fit <- lm(score ~ TrD7 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD7 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
+
+fit <- lm(score ~ TrD8 * TeD + model + Sum , data = d)
+emm <- emmeans(fit, ~ TrD8 | TeD)
+pairs(emm)
+model_summary <- summary(fit)
+# Extract the multiple R-squared value
+multiple_r_squared <- model_summary$r.squared
+cat("Multiple R-squared:", multiple_r_squared, "\n")
+
+# Reshape data
+d_long <- d %>% pivot_longer(cols = starts_with("TrD"),
+                             names_to = "TrD",
+                             values_to = "value")
+
+# Filter data for non-zero values (assuming 1 means the score belongs to that training dataset)
+d_filtered <- d_long %>% filter(value == 1)
+
+# Calculate average score for each combination of TrD and TeD
+avg_scores <- d_filtered %>%
+  group_by(TrD, TeD) %>%
+  summarise(avg_score = mean(score))
+
+# Plot
+ggplot(avg_scores, aes(x = TrD, y = avg_score, color = TeD)) +
+  geom_point(alpha = 0.6, position = position_dodge(width = 0.5)) +
+  geom_line(aes(group = TeD), position = position_dodge(width = 0.5)) +
+  theme_minimal() +
+  labs(x = "Training Dataset", y = "Average Score",
+       title = "Average scores for each test dataset across training datasets",
+       color = "Test Dataset") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
-# # Compute the average performance for each combination of TeD and TrD
-# correlation_data <- d %>%
-#   gather(key = "TrD", value = "used", -TeD, -model, -score) %>%
-#   filter(used == 1) %>%
-#   group_by(TeD, TrD) %>%
-#   summarise(avg_score = mean(score, na.rm = TRUE))
+library(ggplot2)
 
-# # Create the heatmap
-# ggplot(correlation_data, aes(x = TrD, y = TeD)) +
-#   geom_tile(aes(fill = avg_score), color = "white") +
-#   scale_fill_gradient(low = "white", high = "red") +
-#   theme_minimal() +
-#   labs(title = "Correlation between TrDs and TeDs", fill = "Average Score")
+# Data
+contrasts <- c("TrD10 - TrD11", "TrD20 - TrD21", "TrD30 - TrD31", "TrD40 - TrD41",
+               "TrD50 - TrD51", "TrD60 - TrD61", "TrD70 - TrD71", "TrD80 - TrD81")
+TeDs <- c("TeD1", "TeD2", "TeD3", "TeD4", "TeD5", "TeD6", "TeD7")
 
-# # t test between B1, B2, and B3 vs the rest
-# d_B <- subset(d, model=="B1" | model=="B2" | model=="B3")
-# d_M <- subset(d, model=="M1" | model=="M2" | model=="M3" | model=="MF" | model=="MN" | model=="MS")
+# Create a data frame
+df <- data.frame(
+  Contrast = rep(contrasts, each=length(TeDs)),
+  TeD = rep(TeDs, times=length(contrasts)),
+  Estimate = c(0.711, 0.733, 0.907, 0.608, 0.746, 0.408, 0.679,
+-1.4993, -0.0194, 0.0986, 0.4563, 0.5399, 0.2451, -0.4446,
+0.34931, 0.04320, 0.33168, 0.09812, 0.08717, 0.00236, 0.30508,
+0.4966, 0.1236, 0.2666, 0.0524, 0.0570, 0.0428, 0.5121,
+0.110, -0.349, -0.413, -0.291, -0.418, -0.442, -0.191,
+-0.01556, -0.00479, 0.08128, 0.01743, 0.07572, -0.20523, -0.01766,
+-0.0456, -0.3356, -0.3493, -0.2817, -0.1937, -0.3349, -0.2263,
+-0.106, -0.567, -0.620, -0.494, -0.585, -0.454, -0.335
+),
+  SE = rep(c(0.00576, 0.00482, 0.00599, 0.00599, 0.00603, 0.00595, 0.00599, 0.00586), each=length(TeDs))
+)
 
+# Plot
+my_plot <- ggplot(df, aes(x=TeD, y=Estimate, fill=TeD)) +
+  geom_bar(stat="identity", position=position_dodge(), width=0.6) +
+  geom_errorbar(aes(ymin=Estimate-SE, ymax=Estimate+SE), width=.2, position=position_dodge(.6)) +
+  geom_hline(yintercept=0, color="black", linetype="dashed", linewidth=1) +
+  facet_wrap(~ Contrast, ncol=1) +
+  theme_minimal() +
+  theme(legend.position="none") +
+  labs(x = "TeD", y = "Estimate") +
+  guides(fill = guide_legend(title = NULL))
 
-
-# # average for each model
-# aggregate(score ~ model, data = d, mean)
-# m <- lm(score~model, d)
-# summary(m)
-# AIC(m)
-
-# m1 <- lm(score~model+TeD, d)
-# summary(m1)
-# AIC(m1)
-
-# # compare m and m1
-# anova(m, m1)
+# Save the plot with adjusted dimensions
+ggsave("my_plot.png", my_plot, width = 10, height = 16, units = "in")
 ```
 
