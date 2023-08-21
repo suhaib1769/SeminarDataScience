@@ -31,6 +31,36 @@ d$model <- factor(d$model)
 d$TeD <- factor(d$TeD)
 ```
 
+```{r}
+library(ggplot2)
+# plot the average score for each test dataset
+ggplot(d, aes(x = TeD, y = score)) +
+  geom_boxplot() +
+  labs(title = "Average score for each test dataset") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# plot the average score for each model
+ggplot(d, aes(x = model, y = score)) +
+  geom_boxplot() +
+  labs(title = "Average score for each model") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+library(tidyverse)
+# Reshape data
+d_long <- d %>% pivot_longer(cols = starts_with("TrD"),
+                             names_to = "TrD",
+                             values_to = "value")
+
+# Filter data for non-zero values (assuming 1 means the score belongs to that training dataset)
+d_filtered <- d_long %>% filter(value == 1)
+
+# plot the average score for each training dataset
+ggplot(d_filtered, aes(x = TrD, y = score)) +
+  geom_boxplot() +
+  labs(title = "Average score for each training dataset") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+```
 
 ```{r load libraries}
 # Create variables model type and parts refined
